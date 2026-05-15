@@ -1,7 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from database import supabase
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="JoyStock API")
+
+# Configuration du middleware CORS pour permettre les requêtes depuis le frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 """
