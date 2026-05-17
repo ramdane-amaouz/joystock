@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+/*import { useEffect, useState } from "react";
 
 function App() {
   const [produits, setProduits] = useState([]);
@@ -31,6 +31,35 @@ function App() {
         ))}
       </ul>
     </div>
+  );
+}
+
+export default App;*/
+
+
+
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Menu from "./components/Menu";
+import Produits from "./pages/Produits";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+        {/* Menu à gauche */}
+        <div style={{ width: "200px", backgroundColor: "#333" }}>
+          <Menu />
+        </div>
+        
+        {/* Contenu à droite */}
+        <div style={{ flex: 1, padding: "2rem" }}>
+          <Routes>
+            <Route path="/" element={<h1>JoyStock - Accueil</h1>} />
+            <Route path="/produits" element={<Produits />} />
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }
 

@@ -1,0 +1,33 @@
+.menu {
+  background-color: #333;
+  padding: 0;
+  margin: 0;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu li {
+  border-bottom: 1px solid #555;
+}
+
+.menu li:last-child {
+  border-bottom: none;
+}
+
+.menu a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 1rem;
+  transition: background-color 0.3s;
+}
+
+.menu a:hover {
+  background-color: #555;
+}
