@@ -40,7 +40,15 @@ export default App;*/
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Menu from "./components/Menu";
+import Accueil from "./pages/Accueil";
 import Produits from "./pages/Produits";
+
+import Inventaire from "./pages/Inventaire";
+import Alertes from "./pages/Alertes";
+import Parametres from "./pages/Parametres";
+import Statistiques from "./pages/Statistiques";
+
+
 
 function App() {
   return (
@@ -54,8 +62,13 @@ function App() {
         {/* Contenu à droite */}
         <div style={{ flex: 1, padding: "2rem" }}>
           <Routes>
-            <Route path="/" element={<h1>JoyStock - Accueil</h1>} />
+            <Route path="/" element={<Accueil />} />
             <Route path="/produits" element={<Produits />} />
+            <Route path="/inventaire" element={<Inventaire />} />
+            <Route path="/alertes" element={<Alertes />} />
+            <Route path="/parametres" element={<Parametres />} />
+            <Route path="/statistiques" element={<Statistiques />} />
+
           </Routes>
         </div>
       </div>

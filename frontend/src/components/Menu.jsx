@@ -14,6 +14,30 @@ function Menu() {
             Produits
           </Link>
         </li>
+
+        <li>
+          <Link to="/inventaire" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
+            Inventaire
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/statistiques" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
+            Statistiques
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/alertes" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
+            Alertes
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/parametres" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
+            Parametres
+          </Link>
+        </li>
       </ul>
     </nav>
   );

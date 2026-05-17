@@ -13,9 +13,8 @@ function Accueil() {
   }, []);   
 
     return (
-        <div style={{ padding: "2rem" }}>
-            <h1>JoyStock</h1>
-            <h2>Liste des produits</h2>
+        <div>
+            <h2 style={{ textAlign: "left", marginBottom: "3rem" }}>Produits</h2>
 
             {erreur && <p style={{ color: "red" }}>{erreur}</p>}
 
@@ -27,6 +26,8 @@ function Accueil() {
                 ))}
             </ul>
         </div>
+
+
     );
 }
 
