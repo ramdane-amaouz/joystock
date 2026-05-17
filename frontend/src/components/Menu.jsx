@@ -9,6 +9,7 @@ function Menu() {
             Accueil
           </Link>
         </li>
+        
         <li>
           <Link to="/produits" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
             Produits

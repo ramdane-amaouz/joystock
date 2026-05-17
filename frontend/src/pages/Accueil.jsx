@@ -7,10 +7,34 @@ function Accueil() {
     alertes: 0
   });
 
+  const [erreur, setErreur] = useState("");
+
+  useEffect(() => {
+    // Récupérer le nombre de produits
+    fetch("http://127.0.0.1:8000/produits/count")
+      .then((response) => response.json())
+      .then((data) => setStats(prev => ({ ...prev, totalProduits: data.count })))
+      .catch((error) => setErreur("Erreur lors du chargement des produits"));
+
+    // Récupérer le stock total
+    fetch("http://127.0.0.1:8000/produits/total-unites")
+      .then((response) => response.json())
+      .then((data) => setStats(prev => ({ ...prev, stockTotal: data.total_unites })))
+      .catch((error) => setErreur("Erreur lors du chargement du stock"));
+
+    // TODO: Récupérer les alertes (ajouter la route dans le backend quand prêt)
+    // fetch("http://127.0.0.1:8000/produits/alertes")
+    //   .then((response) => response.json())
+    //   .then((data) => setStats(prev => ({ ...prev, alertes: data.count })))
+    //   .catch((error) => setErreur("Erreur lors du chargement des alertes"));
+  }, []);
+
   return (
     <div>
       <h2 style={{ textAlign: "left", marginBottom: "3rem" }}>Tableau de Bord</h2>
       
+      {erreur && <p style={{ color: "red", marginBottom: "1rem" }}>{erreur}</p>}
+
       <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
         <div style={{ 
           flex: "1", 
