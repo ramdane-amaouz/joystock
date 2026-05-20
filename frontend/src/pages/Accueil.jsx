@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function Accueil() {
   const [stats, setStats] = useState({
@@ -6,7 +7,7 @@ function Accueil() {
     stockTotal: 0,
     alertes: 0
   });
-
+  const [produits, setProduits] = useState([]);
   const [erreur, setErreur] = useState("");
 
   useEffect(() => {
@@ -21,6 +22,12 @@ function Accueil() {
       .then((response) => response.json())
       .then((data) => setStats(prev => ({ ...prev, stockTotal: data.total_unites })))
       .catch((error) => setErreur("Erreur lors du chargement du stock"));
+
+    // Récupérer les produits du dernier inventaire
+    fetch("http://127.0.0.1:8000/produits")
+      .then((response) => response.json())
+      .then((data) => setProduits(data))
+      .catch((error) => setErreur("Erreur lors du chargement des produits"));
 
     // TODO: Récupérer les alertes (ajouter la route dans le backend quand prêt)
     // fetch("http://127.0.0.1:8000/produits/alertes")
@@ -71,6 +78,43 @@ function Accueil() {
           <h3>Alertes</h3>
           <p style={{ fontSize: "2rem", fontWeight: "bold", color: "red" }}>{stats.alertes}</p>
         </div>
+      </div>
+
+      <div style={{ textAlign: "left" }}>
+        <h3 style={{ marginTop: "3rem" }}>Aperçu des produits</h3>
+
+
+        {erreur && <p style={{ color: "red" }}>{erreur}</p>}
+
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                    <tr>
+                        <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Nom</th>
+                        <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Catégorie</th>
+                        <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Quantité</th>
+                        <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Unité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {produits.map((produit) => (
+                        <tr key={produit.id}>
+                            <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.nom}</td>
+                            <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.categorie}</td>
+                            <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.quantite}</td>
+                            <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.unite}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <div style={{ marginTop: "1rem", textAlign: "right" }}>
+                <Link to="/produits" style={{ color: "#007BFF", textDecoration: "none", fontSize: "1.1rem" }}>
+                    Voir tous les produits →
+                </Link>
+            </div>
+
+            
+
       </div>
     </div>
   );

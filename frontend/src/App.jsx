@@ -42,6 +42,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Menu from "./components/Menu";
 import Accueil from "./pages/Accueil";
 import Produits from "./pages/Produits";
+import AjoutProduits from "./pages/pages_cachees/Ajout-produits";
 
 import Inventaire from "./pages/Inventaire";
 import Alertes from "./pages/Alertes";
@@ -64,6 +65,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Accueil />} />
             <Route path="/produits" element={<Produits />} />
+            <Route path="/ajout-produit" element={<AjoutProduits />} />
             <Route path="/inventaire" element={<Inventaire />} />
             <Route path="/alertes" element={<Alertes />} />
             <Route path="/parametres" element={<Parametres />} />
