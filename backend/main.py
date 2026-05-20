@@ -49,7 +49,7 @@ from routers import produits, inventaires, stats, auth
     Inclusion des routeurs dans l'application FastAPI
 """
 app.include_router(produits.router)
-#app.include_router(inventaires.router)
+app.include_router(inventaires.router)
 #app.include_router(stats.router)
 #app.include_router(auth.router)
 

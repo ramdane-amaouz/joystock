@@ -44,6 +44,9 @@ import Accueil from "./pages/Accueil";
 import Produits from "./pages/Produits";
 import AjoutProduits from "./pages/pages_cachees/Ajout-produits";
 
+import DemarrerInventaire from "./pages/pages_cachees/Demarrer-inventaire";
+
+
 import Inventaire from "./pages/Inventaire";
 import Alertes from "./pages/Alertes";
 import Parametres from "./pages/Parametres";
@@ -70,6 +73,7 @@ function App() {
             <Route path="/alertes" element={<Alertes />} />
             <Route path="/parametres" element={<Parametres />} />
             <Route path="/statistiques" element={<Statistiques />} />
+            <Route path="/demarrer-inventaire" element={<DemarrerInventaire />} />
 
           </Routes>
         </div>
