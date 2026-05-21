@@ -8,6 +8,7 @@ import Produits from "./pages/Produits";
 import AjoutProduits from "./pages/pages_cachees/Ajout-produits";
 
 import DemarrerInventaire from "./pages/pages_cachees/Demarrer-inventaire";
+import ReceptionMarchandise from "./pages/pages_cachees/Reception-livraison";
 
 import Invitations from "./pages/Invitations";
 
@@ -100,7 +101,7 @@ function App() {
 
               <Route path="/inventaire" element={<Inventaire />} />
               <Route path="/demarrer-inventaire" element={<DemarrerInventaire />} />
-
+              <Route path="/reception-livraison" element={<ReceptionMarchandise />} />
               <Route path="/parametres" element={<Parametres />} />
 
               {admin && (

@@ -53,7 +53,7 @@ app.include_router(produits.router)
 app.include_router(inventaires.router)
 app.include_router(invitations.router)
 app.include_router(profiles.router)
-#app.include_router(stats.router)
+app.include_router(stats.router)
 #app.include_router(auth.router)
 
 
