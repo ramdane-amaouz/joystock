@@ -12,19 +12,19 @@ function Accueil() {
 
   useEffect(() => {
     // Récupérer le nombre de produits
-    fetch("http://127.0.0.1:8000/produits/count")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/count`)
       .then((response) => response.json())
       .then((data) => setStats(prev => ({ ...prev, totalProduits: data.count })))
       .catch((error) => setErreur("Erreur lors du chargement des produits"));
 
     // Récupérer le stock total
-    fetch("http://127.0.0.1:8000/produits/total-unites")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/total-unites`)
       .then((response) => response.json())
       .then((data) => setStats(prev => ({ ...prev, stockTotal: data.total_unites })))
       .catch((error) => setErreur("Erreur lors du chargement du stock"));
 
     // Récupérer les produits du dernier inventaire
-    fetch("http://127.0.0.1:8000/produits")
+    fetch(`${import.meta.env.VITE_API_URL}/produits`)
       .then((response) => response.json())
       .then((data) => setProduits(data))
       .catch((error) => setErreur("Erreur lors du chargement des produits"));

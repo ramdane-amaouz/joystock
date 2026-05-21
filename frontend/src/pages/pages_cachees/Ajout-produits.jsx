@@ -18,12 +18,12 @@ function AjoutProduits() {
   const [message, setMessage] = useState("");
 
   function chargerCategoriesEtUnites() {
-    fetch("http://127.0.0.1:8000/produits/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch(() => setErreur("Erreur lors du chargement des catégories"));
 
-    fetch("http://127.0.0.1:8000/produits/unites")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/unites`)
       .then((response) => response.json())
       .then((data) => setUnites(data))
       .catch(() => setErreur("Erreur lors du chargement des unités"));
@@ -38,7 +38,7 @@ function AjoutProduits() {
       return Number(nouveauProduit.categorie_id);
     }
 
-    const response = await fetch("http://127.0.0.1:8000/produits/categories/add", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/produits/categories/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -61,7 +61,7 @@ function AjoutProduits() {
       return Number(nouveauProduit.unite_id);
     }
 
-    const response = await fetch("http://127.0.0.1:8000/produits/unites/add", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/produits/unites/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -88,7 +88,7 @@ function AjoutProduits() {
       const categorieId = await creerCategorieSiNecessaire();
       const uniteId = await creerUniteSiNecessaire();
 
-      const response = await fetch("http://127.0.0.1:8000/produits/add", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/produits/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

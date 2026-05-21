@@ -14,7 +14,7 @@ function Produits() {
   });
 
   function chargerProduits() {
-    fetch("http://127.0.0.1:8000/produits")
+    fetch(`${import.meta.env.VITE_API_URL}/produits`)
       .then((response) => response.json())
       .then((data) => setProduits(data))
       .catch(() => setErreur("Erreur lors du chargement des produits"));
@@ -23,12 +23,12 @@ function Produits() {
   useEffect(() => {
     chargerProduits();
 
-    fetch("http://127.0.0.1:8000/produits/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch(() => setErreur("Erreur lors du chargement des catégories"));
 
-    fetch("http://127.0.0.1:8000/produits/unites")
+    fetch(`${import.meta.env.VITE_API_URL}/produits/unites`)
       .then((response) => response.json())
       .then((data) => setUnites(data))
       .catch(() => setErreur("Erreur lors du chargement des unités"));
@@ -37,7 +37,7 @@ function Produits() {
   function ajouterProduit(e) {
     e.preventDefault();
 
-    fetch("http://127.0.0.1:8000/produits/add", {
+    fetch(`${import.meta.env.VITE_API_URL}/produits/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

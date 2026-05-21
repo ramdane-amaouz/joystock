@@ -13,7 +13,7 @@ function Invitations() {
     setMessage("");
     setLien("");
 
-    fetch("http://127.0.0.1:8000/invitations/create", {
+    fetch(`${import.meta.env.VITE_API_URL}/invitations/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

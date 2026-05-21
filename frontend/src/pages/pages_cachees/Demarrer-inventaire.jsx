@@ -9,7 +9,7 @@ function DemarrerInventaire() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/produits")
+    fetch(`${import.meta.env.VITE_API_URL}/produits`)
       .then((response) => response.json())
       .then((data) => {
         const produitsAvecSaisie = data.map((produit) => ({
@@ -52,7 +52,7 @@ function DemarrerInventaire() {
     console.log("Utilisateur connecté :", data.user.id);
     console.log("Lignes envoyées :", lignes);
 
-    fetch("http://127.0.0.1:8000/inventaires/demarrer-inventaire", {
+    fetch(`${import.meta.env.VITE_API_URL}/inventaires/demarrer-inventaire`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

@@ -26,7 +26,7 @@ function Inscription() {
 
     try {
       const responseInvitation = await fetch(
-        `http://127.0.0.1:8000/invitations/${token}`
+        `${import.meta.env.VITE_API_URL}/invitations/${token}`
       );
 
       if (!responseInvitation.ok) {
@@ -45,7 +45,7 @@ function Inscription() {
       }
 
       const responseProfile = await fetch(
-        "http://127.0.0.1:8000/invitations/accept",
+        `${import.meta.env.VITE_API_URL}/invitations/accept`,
         {
           method: "POST",
           headers: {

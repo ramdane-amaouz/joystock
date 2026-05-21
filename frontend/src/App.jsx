@@ -36,7 +36,7 @@ function App() {
     try {
       const userId = session.user.id;
 
-      const response = await fetch(`http://127.0.0.1:8000/profiles/${userId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/profiles/${userId}`);
 
       if (!response.ok) {
         throw new Error("Profil introuvable");
