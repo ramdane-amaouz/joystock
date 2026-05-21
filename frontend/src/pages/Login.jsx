@@ -26,6 +26,8 @@ function Login() {
     navigate("/");
   }
 
+  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
+
   return (
   <div
     style={{
@@ -103,31 +105,51 @@ function Login() {
         </div>
 
         <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "bold"
-            }}
-          >
-            Mot de passe
-          </label>
+            <label
+                style={{
+                display: "block",
+                marginBottom: "0.5rem",
+                fontWeight: "bold"
+                }}
+            >
+                Mot de passe
+            </label>
 
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={motDePasse}
-            onChange={(e) => setMotDePasse(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: "1rem",
-              boxSizing: "border-box"
-            }}
-          />
+            <div style={{ position: "relative" }}>
+                <input
+                type={afficherMotDePasse ? "text" : "password"}
+                placeholder="Mot de passe"
+                value={motDePasse}
+                onChange={(e) => setMotDePasse(e.target.value)}
+                required
+                style={{
+                    width: "100%",
+                    padding: "0.75rem",
+                    paddingRight: "4rem",
+                    borderRadius: "5px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                    boxSizing: "border-box"
+                }}
+                />
+
+                <button
+                type="button"
+                onClick={() => setAfficherMotDePasse(!afficherMotDePasse)}
+                style={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#555"
+                }}
+                >
+                {afficherMotDePasse ? "Cacher" : "Voir"}
+                </button>
+            </div>
         </div>
 
         <button
