@@ -7,7 +7,8 @@ app = FastAPI(title="JoyStock API")
 # Configuration du middleware CORS pour permettre les requêtes depuis le frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    #allow_origins=[ "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],  # Permettre toutes les origines (à restreindre en production)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,6 +55,7 @@ app.include_router(invitations.router)
 app.include_router(profiles.router)
 #app.include_router(stats.router)
 #app.include_router(auth.router)
+
 
 def main():
     import uvicorn
