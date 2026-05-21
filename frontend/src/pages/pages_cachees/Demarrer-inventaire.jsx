@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../../supabaseClient";
+
+
 
 function DemarrerInventaire() {
   const [produits, setProduits] = useState([]);
@@ -29,15 +32,25 @@ function DemarrerInventaire() {
     );
   }
 
-  function terminerInventaire(e) {
+  async function terminerInventaire(e) {
     e.preventDefault();
     setErreur("");
     setMessage("");
+
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      setErreur("Utilisateur non connecté");
+      return;
+    }
 
     const lignes = produits.map((produit) => ({
       produit_id: produit.produit_id,
       quantite: Number(produit.nouvelle_quantite)
     }));
+
+    console.log("Utilisateur connecté :", data.user.id);
+    console.log("Lignes envoyées :", lignes);
 
     fetch("http://127.0.0.1:8000/inventaires/demarrer-inventaire", {
       method: "POST",
@@ -45,7 +58,7 @@ function DemarrerInventaire() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        user_id: "TON_UUID_COMPLET_ICI",
+        user_id: data.user.id,
         lignes: lignes
       })
     })

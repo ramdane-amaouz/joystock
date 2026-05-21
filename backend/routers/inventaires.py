@@ -13,7 +13,7 @@ router = APIRouter(prefix="/inventaires", tags=["inventaires"])
 @router.post("/demarrer-inventaire")
 def terminer_inventaire(data: dict):
     try:
-        user_id = data["user_id"] # Remplacez par l'ID de l'utilisateur qui démarre l'inventaire (solutiontemporelle, à remplacer par une solution d'authentification plus tard)
+        user_id = data["user_id"]
         lignes = data["lignes"]
 
         inventaire_response = (
@@ -22,7 +22,7 @@ def terminer_inventaire(data: dict):
             .table("inventaires")
             .insert({
                 "type": "stock",
-                "user_id": "23c12726-50e7-460e-a706-f5d4773bb72e"
+                "user_id": user_id
             })
             .execute()
         )
@@ -54,6 +54,3 @@ def terminer_inventaire(data: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-

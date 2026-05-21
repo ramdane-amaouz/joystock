@@ -42,7 +42,7 @@ def test_produits():
     - stats : pour récupérer et calculer des statistiques sur les produits, les ventes, etc
     - auth : pour gérer l'authentification des utilisateurs et la sécurisation des routes
 """
-from routers import produits, inventaires, stats, auth
+from routers import produits, inventaires, stats, auth, invitations, profiles
 
 
 """
@@ -50,6 +50,8 @@ from routers import produits, inventaires, stats, auth
 """
 app.include_router(produits.router)
 app.include_router(inventaires.router)
+app.include_router(invitations.router)
+app.include_router(profiles.router)
 #app.include_router(stats.router)
 #app.include_router(auth.router)
 
