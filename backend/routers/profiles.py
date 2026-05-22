@@ -23,3 +23,4 @@ def get_profile(user_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    

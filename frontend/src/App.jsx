@@ -20,6 +20,8 @@ import Inscription from "./pages/Inscription";
 
 import Login from "./pages/Login";
 
+import Profile from "./pages/Profile";
+
 
 import { supabase } from "./supabaseClient";
 
@@ -95,6 +97,7 @@ function App() {
 
           <div style={{ flex: 1, padding: "2rem" }}>
             <Routes>
+              <Route path="/profile" element={<Profile />} />
               <Route path="/" element={<Accueil />} />
 
               <Route path="/produits" element={<Produits />} />

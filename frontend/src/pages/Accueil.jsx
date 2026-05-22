@@ -96,7 +96,7 @@ function Accueil() {
                     </tr>
                 </thead>
                 <tbody>
-                    {produits.map((produit) => (
+                    {produits.slice(0,10).map((produit) => (
                         <tr key={produit.id}>
                             <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.nom}</td>
                             <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.categorie}</td>

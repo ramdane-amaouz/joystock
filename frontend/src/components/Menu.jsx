@@ -11,7 +11,13 @@ function Menu({admin}) {
   return (
     <nav id="menu" style={{ background: "#333", padding: 0 }}>
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column" }}>
-        <li style={{ borderBottom: "1px solid #555" }}>
+        <li style={{ padding: "1rem", borderBottom: "1px solid #555", color: "#fff", fontSize: "1.2rem", fontWeight: "bold" }}>
+          <Link to="/profile" style={{ color: "#fff", textDecoration: "none", fontSize: "1.2rem", fontWeight: "bold" }}>
+            Mon Profil
+          </Link>
+        </li>
+
+        <li style={{ /*borderBottom: "1px solid #555"*/ }}>
           <Link to="/" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
             Accueil
           </Link>
