@@ -17,6 +17,7 @@ import Alertes from "./pages/Alertes";
 import Parametres from "./pages/Parametres";
 import Statistiques from "./pages/Statistiques";
 import Inscription from "./pages/Inscription";
+import Recettes from "./pages/Recettes";
 
 import Login from "./pages/Login";
 
@@ -113,6 +114,7 @@ function App() {
                   <Route path="/ajout-produit" element={<AjoutProduits />} />
                   <Route path="/invitations" element={<Invitations />} />
                   <Route path="/alertes" element={<Alertes />} />
+                  <Route path="/recettes" element={<Recettes />} />
                 </>
               )}
 

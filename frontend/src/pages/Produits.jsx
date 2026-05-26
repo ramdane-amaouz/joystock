@@ -81,6 +81,7 @@ function Produits() {
           <tr>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Nom</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Catégorie</th>
+            <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Type</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Quantité</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Unité</th>
           </tr>
@@ -94,6 +95,9 @@ function Produits() {
               </td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
                 {produit.categorie}
+              </td>
+              <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
+                {produit.type_produit}
               </td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
                 {produit.quantite}

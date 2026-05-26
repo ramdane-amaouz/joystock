@@ -9,6 +9,7 @@ router = APIRouter(prefix="/produits", tags=["produits"])
 
 
 
+
 """endpoint pour recuperer tous les produits présents dans le resto (seulement afficher mon ne modifie pas les quantites)"""
 @router.get("/")
 def get_produits():
@@ -115,6 +116,7 @@ def add_produit(produit: dict):
             "nom": produit["nom"],
             "categorie_id": produit["categorie_id"],
             "unite_id": produit["unite_id"],
+            "type_produit": produit.get("type_produit", "matiere_premiere"),
             "actif": True
         }
 
@@ -175,6 +177,25 @@ def add_unite(unite: dict):
             "message": "Unité ajoutée",
             "unite": response.data[0]
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.get("/matieres-premieres")
+def get_matieres_premieres():
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("produits")
+            .select("*")
+            .eq("type_produit", "matiere_premiere")
+            .eq("actif", True)
+            .execute()
+        )
+
+        return response.data
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

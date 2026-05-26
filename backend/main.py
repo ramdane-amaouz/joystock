@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from database import supabase
 from fastapi.middleware.cors import CORSMiddleware
 
+
+
 app = FastAPI(title="JoyStock API")
 
 # Configuration du middleware CORS pour permettre les requêtes depuis le frontend
@@ -42,8 +44,9 @@ def test_produits():
     - inventaires : pour gérer les inventaires et les mises à jour de stock
     - stats : pour récupérer et calculer des statistiques sur les produits, les ventes, etc
     - auth : pour gérer l'authentification des utilisateurs et la sécurisation des routes
+    - recettes : pour gérer les recettes et les ingrédients
 """
-from routers import produits, inventaires, stats, auth, invitations, profiles
+from routers import produits, inventaires, stats, auth, invitations, profiles, recettes
 
 
 """
@@ -54,6 +57,7 @@ app.include_router(inventaires.router)
 app.include_router(invitations.router)
 app.include_router(profiles.router)
 app.include_router(stats.router)
+app.include_router(recettes.router)
 #app.include_router(auth.router)
 
 

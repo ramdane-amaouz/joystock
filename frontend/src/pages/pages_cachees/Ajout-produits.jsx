@@ -5,6 +5,7 @@ function AjoutProduits() {
   const [nouveauProduit, setNouveauProduit] = useState({
     nom: "",
     categorie_id: "",
+    type_produit: "matiere_premiere",
     unite_id: ""
   });
 
@@ -96,6 +97,7 @@ function AjoutProduits() {
         body: JSON.stringify({
           nom: nouveauProduit.nom,
           categorie_id: categorieId,
+          type_produit: nouveauProduit.type_produit,
           unite_id: uniteId
         })
       });
@@ -109,6 +111,7 @@ function AjoutProduits() {
       setNouveauProduit({
         nom: "",
         categorie_id: "",
+        type_produit: "matiere_premiere",
         unite_id: ""
       });
       setNouvelleCategorie("");
@@ -186,6 +189,25 @@ function AjoutProduits() {
         )}
 
         <select
+          value={nouveauProduit.type_produit}
+          onChange={(e) =>
+            setNouveauProduit((prev) => ({
+              ...prev,
+              type_produit: e.target.value
+            }))
+          }
+          required
+          style={{ padding: "0.5rem", fontSize: "1rem" }}
+        >
+          <option value="matiere_premiere">Matière première</option>
+          <option value="produit_prepare">Produit préparé</option>
+          <option value="consommable">Consommable</option>
+          <option value="entretien">Entretien</option>
+        </select>
+
+
+
+        <select
           value={nouveauProduit.unite_id}
           onChange={(e) =>
             setNouveauProduit((prev) => ({
@@ -206,6 +228,10 @@ function AjoutProduits() {
 
           <option value="new">+ Nouvelle unité</option>
         </select>
+
+
+
+
 
         {nouveauProduit.unite_id === "new" && (
           <input

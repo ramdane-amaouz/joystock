@@ -43,6 +43,15 @@ function Menu({admin}) {
           </li>
         )}
 
+
+        {admin && (
+          <li>
+            <Link to="/recettes" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
+              Recettes
+            </Link>
+          </li>
+        )}
+
         {admin && (
           <li>
             <Link to="/alertes" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
