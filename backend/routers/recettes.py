@@ -7,14 +7,39 @@ router = APIRouter(prefix="/recettes", tags=["recettes"])
 @router.get("/")
 def get_recettes():
     try:
-        response = (
+        recettes_response = (
             supabase
             .schema("joystock")
             .table("recettes")
             .select("*")
+            .order("id", desc=True)
             .execute()
         )
-        return response.data
+
+        recettes = recettes_response.data
+
+        for recette in recettes:
+            lignes_response = (
+                supabase
+                .schema("joystock")
+                .table("lignes_recette")
+                .select("*, produits:produit_ingredient_id(nom, unite_id, unites:unite_id(nom))")
+                .eq("recette_id", recette["id"])
+                .execute()
+            )
+
+            recette["ingredients"] = [
+                {
+                    "produit_ingredient_id": ligne["produit_ingredient_id"],
+                    "produit_ingredient_nom": ligne["produits"]["nom"],
+                    "quantite": ligne["quantite"],
+                    "unite_nom": ligne["produits"]["unites"]["nom"]
+                }
+                for ligne in lignes_response.data
+            ]
+
+        return recettes
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
