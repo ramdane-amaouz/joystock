@@ -31,40 +31,36 @@ function Statistiques() {
 
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/stats/consommation`)
-      .then((response) => response.json())
-      .then((data) => {
-        setDonnees(data);
+    async function chargerProfil() {
+      try {
+        const { data } = await supabase.auth.getSession();
 
-        if (data.length > 0) {
-          setProduitSelectionne(data[0].produit_nom);
+        if (!data.session) {
+          setErreur("Utilisateur non connecté");
+          return;
         }
-      })
-      .catch(() => setErreur("Erreur lors du chargement des statistiques"));
 
-    fetch(`${import.meta.env.VITE_API_URL}/stats/derniere-consommation`)
-      .then((response) => response.json())
-      .then((data) => {
-        setDernieresConsommations(data);
-      });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/profiles/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.session.access_token}`
+            }
+          }
+        );
 
-    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/total-recettes`)
-      .then((response) => response.json())
-      .then((data) => setTotalVentesRecettes(data));
-
-    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/par-jour`)
-      .then((response) => response.json())
-      .then((data) => {
-        setVentesParJour(data);
-
-        if (data.length > 0) {
-          setRecetteSelectionnee(data[0].recette_nom);
+        if (!response.ok) {
+          throw new Error("Profil introuvable");
         }
-      });
 
-    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/par-semaine`)
-      .then((response) => response.json())
-      .then((data) => setVentesParSemaine(data));
+        const profilData = await response.json();
+        setProfil(profilData);
+      } catch (error) {
+        setErreur("Erreur lors du chargement du profil");
+      }
+    }
+
+    chargerProfil();
   }, []);
 
   const produits = [...new Set(donnees.map((item) => item.produit_nom))];

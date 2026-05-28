@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 
+
+
+
 function Profile() {
   const [profil, setProfil] = useState(null);
   const [erreur, setErreur] = useState("");
@@ -34,6 +37,30 @@ function Profile() {
 
     chargerProfil();
   }, []);
+
+
+
+
+///////fonction temporaire pour tester le endpoint /profiles/me avec token d'authentification/////////
+  async function testerProfileMe() {
+    const { data } = await supabase.auth.getSession();
+
+    console.log("SESSION :", data.session);
+    console.log("TOKEN :", data.session.access_token);
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/profiles/me`, {
+      headers: {
+        Authorization: `Bearer ${data.session.access_token}`
+      }
+    });
+
+    const profil = await response.json();
+
+    console.log("PROFIL /ME :", profil);
+  }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
   return (
     <div>
@@ -72,6 +99,11 @@ function Profile() {
           </div>
         )
       )}
+
+
+      <button onClick={testerProfileMe}>
+        Tester /profiles/me
+      </button>
     </div>
   );
 }

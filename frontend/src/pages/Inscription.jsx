@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
+
 function Inscription() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ function Inscription() {
         throw new Error(error.message);
       }
 
-      const responseProfile = await fetch(
+      /*const responseProfile = await fetch(
         `${import.meta.env.VITE_API_URL}/invitations/accept`,
         {
           method: "POST",
@@ -53,12 +54,33 @@ function Inscription() {
           },
           body: JSON.stringify({
             token,
-            user_id: data.user.id,
+          //  user_id: data.user.id,
             nom,
             prenom
           })
         }
-      );
+      );*/
+
+
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      if (!sessionData.session) {
+        throw new Error("Session introuvable après inscription.");
+      }
+
+
+      const responseProfile = await fetch(`${import.meta.env.VITE_API_URL}/invitations/accept`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionData.session.access_token}`
+        },
+        body: JSON.stringify({
+          token,
+          nom,
+          prenom
+        })
+      });
 
       if (!responseProfile.ok) {
         throw new Error("Erreur lors de la création du profil.");

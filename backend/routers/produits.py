@@ -1,9 +1,10 @@
 """on curee ici les route pour permettre a l'adminsitrateur d'ajouter un article a son stock, de supprimer un article de son stock, et de mettre a jour les données d'un article dans la base de données"""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
 router = APIRouter(prefix="/produits", tags=["produits"])
 
+from core.security import get_current_user, require_admin
 
 
 
@@ -110,7 +111,8 @@ def get_unites():
         
 
 @router.post("/add")
-def add_produit(produit: dict):
+def add_produit(produit: dict, user = Depends(get_current_user)):
+    require_admin(user)
     try:
         nouveau_produit = {
             "nom": produit["nom"],
@@ -139,7 +141,8 @@ def add_produit(produit: dict):
 
 
 @router.post("/categories/add")
-def add_categorie(categorie: dict):
+def add_categorie(categorie: dict, user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
@@ -161,7 +164,8 @@ def add_categorie(categorie: dict):
 
 
 @router.post("/unites/add")
-def add_unite(unite: dict):
+def add_unite(unite: dict, user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase

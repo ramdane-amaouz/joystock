@@ -58,7 +58,7 @@ function DemarrerInventaire() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        user_id: data.user.id,
+     //   user_id: data.user.id,
         lignes: lignes
       })
     })

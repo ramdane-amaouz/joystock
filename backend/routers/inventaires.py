@@ -1,19 +1,17 @@
-"""on cree ici une route pour créer un inventaire, recuperer un inventaire, et ainsi metter a jour les données du stock dans la base de données"""
-#router = APIRouter(prefix="/inventaires", tags=["inventaires"])
-
-
-
-
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
+from core.security import get_current_user
 
 router = APIRouter(prefix="/inventaires", tags=["inventaires"])
 
+
 @router.post("/demarrer-inventaire")
-def terminer_inventaire(data: dict):
+def terminer_inventaire(
+    data: dict,
+    user = Depends(get_current_user)
+):
     try:
-        user_id = data["user_id"]
+        user_id = user["sub"]
         lignes = data["lignes"]
 
         inventaire_response = (
@@ -57,9 +55,12 @@ def terminer_inventaire(data: dict):
 
 
 @router.post("/reception-livraison")
-def reception_livraison(data: dict):
+def reception_livraison(
+    data: dict,
+    user = Depends(get_current_user)
+):
     try:
-        user_id = data["user_id"]
+        user_id = user["sub"]
         lignes = data["lignes"]
 
         inventaire_response = (

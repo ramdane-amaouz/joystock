@@ -26,5 +26,24 @@ def get_current_user(authorization: str = Header(...)):
         )
     
 
+def require_admin(user):
+    user_id = user["sub"]
 
-    """""je dois le supprimer plus tard pour éviter les problèmes de dépendances circulaires avec les autres fichiers qui importent get_current_user et require_admin"""""
+    response = (
+        supabase
+        .schema("joystock")
+        .table("profiles")
+        .select("role")
+        .eq("id", user_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Profil introuvable")
+
+    role = response.data[0]["role"]
+
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Accès interdit")
+
+    return user

@@ -1,15 +1,35 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 function Recettes() {
   const [recettes, setRecettes] = useState([]);
   const [erreur, setErreur] = useState("");
 
-  function chargerRecettes() {
-    fetch(`${import.meta.env.VITE_API_URL}/recettes`)
-      .then((response) => response.json())
-      .then((data) => setRecettes(data))
-      .catch(() => setErreur("Erreur lors du chargement des recettes"));
+  async function chargerRecettes() {
+    try {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        setErreur("Utilisateur non connecté");
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/recettes`, {
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du chargement des recettes");
+      }
+
+      const recettesData = await response.json();
+      setRecettes(recettesData);
+    } catch (error) {
+      setErreur(error.message);
+    }
   }
 
   useEffect(() => {
@@ -53,7 +73,7 @@ function Recettes() {
             >
               <h3>{recette.nom}</h3>
 
-              {recette.ingredients.length === 0 ? (
+              {!recette.ingredients || recette.ingredients.length === 0 ? (
                 <p>Aucun ingrédient renseigné.</p>
               ) : (
                 <ul>

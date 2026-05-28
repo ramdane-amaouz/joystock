@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
+
+from core.security import get_current_user, require_admin
 
 router = APIRouter(prefix="/recettes", tags=["recettes"])
 
 
 @router.get("/")
-def get_recettes():
+def get_recettes(required_user = Depends(get_current_user)):
     try:
         recettes_response = (
             supabase
@@ -45,7 +47,8 @@ def get_recettes():
 
 
 @router.post("/add")
-def add_recette(data: dict):
+def add_recette(data: dict, user = Depends(get_current_user)):
+    require_admin(user)
     try:
         nom = data["nom"]
         ingredients = data["ingredients"]

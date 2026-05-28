@@ -1,11 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
+
+from core.security import get_current_user, require_admin
 
 router = APIRouter(prefix="/invitations", tags=["invitations"])
 
 
 @router.post("/create")
-def create_invitation(data: dict):
+def create_invitation(data: dict, user = Depends(get_current_user)):
+    require_admin(user)
     try:
         email = data["email"]
         role = data.get("role", "employe")
@@ -37,10 +40,10 @@ def create_invitation(data: dict):
 
 
 @router.post("/accept")
-def accept_invitation(data: dict):
+def accept_invitation(data: dict, user = Depends(get_current_user)):
     try:
         token = data["token"]
-        user_id = data["user_id"]
+        #user_id = data["user_id"]
         nom = data["nom"]
         prenom = data["prenom"]
 
@@ -64,7 +67,7 @@ def accept_invitation(data: dict):
             .schema("joystock")
             .table("profiles")
             .insert({
-                "id": user_id,
+                "id": user["sub"],
                 "nom": nom,
                 "prenom": prenom,
                 "email": invitation["email"],

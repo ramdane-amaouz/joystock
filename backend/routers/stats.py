@@ -1,11 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
+
+from core.security import get_current_user, require_admin
 
 router = APIRouter(prefix="/stats", tags=["stats"])
 
 
 @router.get("/consommation")
-def get_consommation():
+def get_consommation(user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
@@ -23,7 +26,8 @@ def get_consommation():
 
 
 @router.get("/derniere-consommation")
-def get_derniere_consommation():
+def get_derniere_consommation(user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
@@ -42,7 +46,8 @@ def get_derniere_consommation():
 
 
 @router.get("/ventes/total-recettes")
-def get_total_ventes_par_recette():
+def get_total_ventes_par_recette(user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
@@ -57,7 +62,8 @@ def get_total_ventes_par_recette():
 
 
 @router.get("/ventes/par-jour")
-def get_ventes_par_jour():
+def get_ventes_par_jour(user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
@@ -73,7 +79,8 @@ def get_ventes_par_jour():
 
 
 @router.get("/ventes/par-semaine")
-def get_ventes_par_semaine():
+def get_ventes_par_semaine(user = Depends(get_current_user)):
+    require_admin(user)
     try:
         response = (
             supabase
