@@ -21,6 +21,15 @@ function Statistiques() {
 
   const [dernieresConsommations, setDernieresConsommations] = useState([]);
 
+
+  const [totalVentesRecettes, setTotalVentesRecettes] = useState([]);
+  const [ventesParJour, setVentesParJour] = useState([]);
+  const [ventesParSemaine, setVentesParSemaine] = useState([]);
+  const [recetteSelectionnee, setRecetteSelectionnee] = useState("");
+  const [modeVente, setModeVente] = useState("jour");
+
+
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/stats/consommation`)
       .then((response) => response.json())
@@ -38,6 +47,24 @@ function Statistiques() {
       .then((data) => {
         setDernieresConsommations(data);
       });
+
+    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/total-recettes`)
+      .then((response) => response.json())
+      .then((data) => setTotalVentesRecettes(data));
+
+    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/par-jour`)
+      .then((response) => response.json())
+      .then((data) => {
+        setVentesParJour(data);
+
+        if (data.length > 0) {
+          setRecetteSelectionnee(data[0].recette_nom);
+        }
+      });
+
+    fetch(`${import.meta.env.VITE_API_URL}/stats/ventes/par-semaine`)
+      .then((response) => response.json())
+      .then((data) => setVentesParSemaine(data));
   }, []);
 
   const produits = [...new Set(donnees.map((item) => item.produit_nom))];
@@ -48,6 +75,28 @@ function Statistiques() {
       date: new Date(item.date_stock_actuel).toLocaleDateString("fr-FR"),
       consommation: item.consommation_estimee,
       unite: item.unite
+    }));
+
+
+
+  const recettes = [
+    ...new Set([
+      ...ventesParJour.map((item) => item.recette_nom),
+      ...ventesParSemaine.map((item) => item.recette_nom)
+    ])
+  ];
+
+  const donneesVentes =
+    modeVente === "jour" ? ventesParJour : ventesParSemaine;
+
+  const donneesVentesRecette = donneesVentes
+    .filter((item) => item.recette_nom === recetteSelectionnee)
+    .map((item) => ({
+      date:
+        modeVente === "jour"
+          ? new Date(item.jour).toLocaleDateString("fr-FR")
+          : new Date(item.semaine).toLocaleDateString("fr-FR"),
+      quantite_vendue: Number(item.quantite_vendue)
     }));
 
   return (
@@ -165,6 +214,121 @@ function Statistiques() {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+
+      <div
+        style={{
+          width: "100%",
+          height: "500px",
+          backgroundColor: "white",
+          padding: "2rem",
+          borderRadius: "10px",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          marginTop: "3rem"
+        }}
+      >
+        <h3 style={{ marginBottom: "1rem" }}>
+          Total vendu par recette
+        </h3>
+
+        {totalVentesRecettes.length === 0 ? (
+          <p>Aucune vente enregistrée.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={totalVentesRecettes}>
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis
+                dataKey="recette_nom"
+                angle={-20}
+                textAnchor="end"
+                interval={0}
+                height={80}
+              />
+
+              <YAxis />
+              <Tooltip />
+
+              <Bar dataKey="total_vendu" fill="#333" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      <div
+        style={{
+          width: "100%",
+          height: "450px",
+          backgroundColor: "white",
+          padding: "2rem",
+          borderRadius: "10px",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          marginTop: "3rem"
+        }}
+      >
+        <h3 style={{ marginBottom: "1rem" }}>
+          Évolution des ventes par recette
+        </h3>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            marginBottom: "1.5rem",
+            maxWidth: "600px"
+          }}
+        >
+          <select
+            value={recetteSelectionnee}
+            onChange={(e) => setRecetteSelectionnee(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "0.75rem",
+              borderRadius: "5px",
+              border: "1px solid #ccc"
+            }}
+          >
+            {recettes.map((recette) => (
+              <option key={recette} value={recette}>
+                {recette}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={modeVente}
+            onChange={(e) => setModeVente(e.target.value)}
+            style={{
+              width: "160px",
+              padding: "0.75rem",
+              borderRadius: "5px",
+              border: "1px solid #ccc"
+            }}
+          >
+            <option value="jour">Par jour</option>
+            <option value="semaine">Par semaine</option>
+          </select>
+        </div>
+
+        {donneesVentesRecette.length === 0 ? (
+          <p>Aucune donnée de vente disponible pour cette recette.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height="75%">
+            <LineChart data={donneesVentesRecette}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="quantite_vendue"
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </div>        
+
     </div>
   );
 }

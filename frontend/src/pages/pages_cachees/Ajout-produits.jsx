@@ -200,7 +200,6 @@ function AjoutProduits() {
           style={{ padding: "0.5rem", fontSize: "1rem" }}
         >
           <option value="matiere_premiere">Matière première</option>
-          <option value="produit_prepare">Produit préparé</option>
           <option value="consommable">Consommable</option>
           <option value="entretien">Entretien</option>
         </select>
