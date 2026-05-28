@@ -46,6 +46,54 @@ def get_recettes(required_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
+@router.get("/{recette_id}")
+def get_recette(
+    recette_id: int,
+    user=Depends(get_current_user)
+):
+    try:
+        recette_response = (
+            supabase
+            .schema("joystock")
+            .table("recettes")
+            .select("*")
+            .eq("id", recette_id)
+            .execute()
+        )
+
+        if not recette_response.data:
+            raise HTTPException(status_code=404, detail="Recette introuvable")
+
+        recette = recette_response.data[0]
+
+        lignes_response = (
+            supabase
+            .schema("joystock")
+            .table("lignes_recette")
+            .select("*, produits:produit_ingredient_id(nom, unite_id, unites:unite_id(nom))")
+            .eq("recette_id", recette_id)
+            .execute()
+        )
+
+        recette["ingredients"] = [
+            {
+                "produit_ingredient_id": ligne["produit_ingredient_id"],
+                "produit_ingredient_nom": ligne["produits"]["nom"],
+                "quantite": ligne["quantite"],
+                "unite_nom": ligne["produits"]["unites"]["nom"]
+            }
+            for ligne in lignes_response.data
+        ]
+
+        return recette
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/add")
 def add_recette(data: dict, user = Depends(get_current_user)):
     require_admin(user)

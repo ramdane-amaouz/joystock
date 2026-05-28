@@ -19,6 +19,7 @@ import Statistiques from "./pages/Statistiques";
 import Inscription from "./pages/Inscription";
 import Recettes from "./pages/Recettes";
 import Ajout_Recettes from "./pages/pages_cachees/Ajout-recettes";
+import ModifierRecette from "./pages/pages_cachees/Modifier-recette";
 
 import Login from "./pages/Login";
 
@@ -116,6 +117,7 @@ function App() {
                   <Route path="/invitations" element={<Invitations />} />
                   <Route path="/alertes" element={<Alertes />} />
                   <Route path="/recettes" element={<Recettes />} />
+                  <Route path="/modifier-recette/:id" element={<ModifierRecette />} />
                   <Route path="/ajout-recette" element={<Ajout_Recettes />} />
                 </>
               )}
