@@ -89,3 +89,94 @@ def add_recette(data: dict, user = Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.put("/update/{recette_id}")
+def update_recette(
+    recette_id: int,
+    data: dict,
+    user=Depends(get_current_user)
+):
+    require_admin(user)
+
+    try:
+        nom = data["nom"]
+        ingredients = data["ingredients"]
+
+        recette_response = (
+            supabase
+            .schema("joystock")
+            .table("recettes")
+            .update({"nom": nom})
+            .eq("id", recette_id)
+            .execute()
+        )
+
+        (
+            supabase
+            .schema("joystock")
+            .table("lignes_recette")
+            .delete()
+            .eq("recette_id", recette_id)
+            .execute()
+        )
+
+        lignes = []
+
+        for ingredient in ingredients:
+            lignes.append({
+                "recette_id": recette_id,
+                "produit_ingredient_id": ingredient["produit_ingredient_id"],
+                "quantite": ingredient["quantite"]
+            })
+
+        lignes_response = (
+            supabase
+            .schema("joystock")
+            .table("lignes_recette")
+            .insert(lignes)
+            .execute()
+        )
+
+        return {
+            "message": "Recette mise à jour avec succès",
+            "recette": recette_response.data[0] if recette_response.data else None,
+            "ingredients": lignes_response.data
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/delete/{recette_id}")
+def delete_recette(
+    recette_id: int,
+    user=Depends(get_current_user)
+):
+    require_admin(user)
+
+    try:
+        (
+            supabase
+            .schema("joystock")
+            .table("lignes_recette")
+            .delete()
+            .eq("recette_id", recette_id)
+            .execute()
+        )
+
+        (
+            supabase
+            .schema("joystock")
+            .table("recettes")
+            .delete()
+            .eq("id", recette_id)
+            .execute()
+        )
+
+        return {
+            "message": "Recette supprimée avec succès"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

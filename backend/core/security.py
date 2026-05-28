@@ -1,6 +1,6 @@
 from fastapi import Header, HTTPException
 import jwt
-
+from database import supabase
 
 def get_current_user(authorization: str = Header(...)):
     try:

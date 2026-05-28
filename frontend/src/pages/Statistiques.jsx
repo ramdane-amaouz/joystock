@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
+
 import {
   LineChart,
   Line,
@@ -6,10 +8,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ResponsiveContainer
-} from "recharts";
-
-import {
+  ResponsiveContainer,
   BarChart,
   Bar
 } from "recharts";
@@ -21,46 +20,78 @@ function Statistiques() {
 
   const [dernieresConsommations, setDernieresConsommations] = useState([]);
 
-
   const [totalVentesRecettes, setTotalVentesRecettes] = useState([]);
   const [ventesParJour, setVentesParJour] = useState([]);
   const [ventesParSemaine, setVentesParSemaine] = useState([]);
   const [recetteSelectionnee, setRecetteSelectionnee] = useState("");
   const [modeVente, setModeVente] = useState("jour");
 
+  async function fetchAvecToken(url) {
+    const { data } = await supabase.auth.getSession();
 
+    if (!data.session) {
+      throw new Error("Utilisateur non connecté");
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${data.session.access_token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors du chargement des statistiques");
+    }
+
+    return response.json();
+  }
 
   useEffect(() => {
-    async function chargerProfil() {
+    async function chargerStats() {
       try {
-        const { data } = await supabase.auth.getSession();
-
-        if (!data.session) {
-          setErreur("Utilisateur non connecté");
-          return;
-        }
-
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/profiles/me`,
-          {
-            headers: {
-              Authorization: `Bearer ${data.session.access_token}`
-            }
-          }
+        const consommation = await fetchAvecToken(
+          `${import.meta.env.VITE_API_URL}/stats/consommation`
         );
 
-        if (!response.ok) {
-          throw new Error("Profil introuvable");
+        setDonnees(consommation);
+
+        if (consommation.length > 0) {
+          setProduitSelectionne(consommation[0].produit_nom);
         }
 
-        const profilData = await response.json();
-        setProfil(profilData);
+        const derniereConso = await fetchAvecToken(
+          `${import.meta.env.VITE_API_URL}/stats/derniere-consommation`
+        );
+
+        setDernieresConsommations(derniereConso);
+
+        const totalVentes = await fetchAvecToken(
+          `${import.meta.env.VITE_API_URL}/stats/ventes/total-recettes`
+        );
+
+        setTotalVentesRecettes(totalVentes);
+
+        const ventesJour = await fetchAvecToken(
+          `${import.meta.env.VITE_API_URL}/stats/ventes/par-jour`
+        );
+
+        setVentesParJour(ventesJour);
+
+        if (ventesJour.length > 0) {
+          setRecetteSelectionnee(ventesJour[0].recette_nom);
+        }
+
+        const ventesSemaine = await fetchAvecToken(
+          `${import.meta.env.VITE_API_URL}/stats/ventes/par-semaine`
+        );
+
+        setVentesParSemaine(ventesSemaine);
       } catch (error) {
-        setErreur("Erreur lors du chargement du profil");
+        setErreur(error.message);
       }
     }
 
-    chargerProfil();
+    chargerStats();
   }, []);
 
   const produits = [...new Set(donnees.map((item) => item.produit_nom))];
@@ -69,11 +100,9 @@ function Statistiques() {
     .filter((item) => item.produit_nom === produitSelectionne)
     .map((item) => ({
       date: new Date(item.date_stock_actuel).toLocaleDateString("fr-FR"),
-      consommation: item.consommation_estimee,
+      consommation: Number(item.consommation_estimee),
       unite: item.unite
     }));
-
-
 
   const recettes = [
     ...new Set([
@@ -161,16 +190,11 @@ function Statistiques() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="consommation"
-                strokeWidth={2}
-              />
+              <Line type="monotone" dataKey="consommation" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         )}
       </div>
-
 
       <div
         style={{
@@ -187,30 +211,28 @@ function Statistiques() {
           Dernière consommation estimée par produit
         </h3>
 
-        <ResponsiveContainer width="100%" height="85%">
-          <BarChart data={dernieresConsommations}>
-            <CartesianGrid strokeDasharray="3 3" />
+        {dernieresConsommations.length === 0 ? (
+          <p>Aucune consommation disponible.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={dernieresConsommations}>
+              <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis
-              dataKey="produit_nom"
-              angle={-20}
-              textAnchor="end"
-              interval={0}
-              height={80}
-            />
+              <XAxis
+                dataKey="produit_nom"
+                angle={-20}
+                textAnchor="end"
+                interval={0}
+                height={80}
+              />
 
-            <YAxis />
-
-            <Tooltip />
-
-            <Bar
-              dataKey="consommation_estimee"
-              fill="#333"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="consommation_estimee" fill="#333" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
-
 
       <div
         style={{
@@ -244,7 +266,6 @@ function Statistiques() {
 
               <YAxis />
               <Tooltip />
-
               <Bar dataKey="total_vendu" fill="#333" />
             </BarChart>
           </ResponsiveContainer>
@@ -323,8 +344,7 @@ function Statistiques() {
             </LineChart>
           </ResponsiveContainer>
         )}
-      </div>        
-
+      </div>
     </div>
   );
 }

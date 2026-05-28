@@ -15,11 +15,14 @@ function Recettes() {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/recettes`, {
-        headers: {
-          Authorization: `Bearer ${data.session.access_token}`
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/recettes`,
+        {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`
+          }
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Erreur lors du chargement des recettes");
@@ -27,6 +30,36 @@ function Recettes() {
 
       const recettesData = await response.json();
       setRecettes(recettesData);
+
+    } catch (error) {
+      setErreur(error.message);
+    }
+  }
+
+  async function supprimerRecette(id) {
+    const confirmation = confirm("Supprimer cette recette ?");
+
+    if (!confirmation) return;
+
+    try {
+      const { data } = await supabase.auth.getSession();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/recettes/delete/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression");
+      }
+
+      chargerRecettes();
+
     } catch (error) {
       setErreur(error.message);
     }
@@ -42,7 +75,11 @@ function Recettes() {
         Recettes
       </h2>
 
-      {erreur && <p style={{ color: "red" }}>{erreur}</p>}
+      {erreur && (
+        <p style={{ color: "red" }}>
+          {erreur}
+        </p>
+      )}
 
       <div style={{ marginBottom: "2rem", textAlign: "right" }}>
         <Link
@@ -85,6 +122,53 @@ function Recettes() {
                   ))}
                 </ul>
               )}
+
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "0.75rem",
+                        marginTop: "1rem",
+                        justifyContent: "flex-end"
+                    }}
+                    >
+                    <Link
+                        to={`/modifier-recette/${recette.id}`}
+                        style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "42px",
+                        height: "42px",
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: "8px",
+                        textDecoration: "none",
+                        fontSize: "1.2rem",
+                        transition: "0.2s",
+                        border: "1px solid #ddd"
+                        }}
+                    >
+                        📝
+                    </Link>
+
+                    <button
+                        onClick={() => supprimerRecette(recette.id)}
+                        style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "42px",
+                        height: "42px",
+                        backgroundColor: "#fff5f5",
+                        border: "1px solid #f1b0b0",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontSize: "1.2rem",
+                        transition: "0.2s"
+                        }}
+                    >
+                        🗑️
+                    </button>
+                </div>
             </div>
           ))}
         </div>
