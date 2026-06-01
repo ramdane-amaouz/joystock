@@ -168,7 +168,17 @@ function Login() {
           Se connecter
         </button>
       </form>
+
+      <p style={{ textAlign: "center", marginTop: "1rem" }}>
+        <a href="/reset-password" style={{ color: "#333", textDecoration: "underline" }}>
+          Mot de passe oublié ?
+        </a>
+      </p>
+
     </div>
+
+      
+
   </div>
 );
 }

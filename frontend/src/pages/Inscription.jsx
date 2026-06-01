@@ -45,22 +45,6 @@ function Inscription() {
         throw new Error(error.message);
       }
 
-      /*const responseProfile = await fetch(
-        `${import.meta.env.VITE_API_URL}/invitations/accept`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            token,
-          //  user_id: data.user.id,
-            nom,
-            prenom
-          })
-        }
-      );*/
-
 
       const { data: sessionData } = await supabase.auth.getSession();
 
