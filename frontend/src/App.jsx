@@ -74,6 +74,15 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+
+  // Ping toutes les 10 minutes pour éviter le cold start
+  useEffect(() => {
+    const ping = () => fetch("https://joystock.onrender.com/").catch(() => {});
+    ping();
+    const interval = setInterval(ping, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (chargement) {
     return <p>Chargement...</p>;
   }
