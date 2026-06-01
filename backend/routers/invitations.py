@@ -1,3 +1,5 @@
+from services.mailer import send_invitation_email
+
 from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
 
@@ -27,12 +29,15 @@ def create_invitation(data: dict, user = Depends(get_current_user)):
         invitation = response.data[0]
         token = invitation["token"]
 
+        email_sent = send_invitation_email(to_email=email, token=token)
+
         lien = f"http://localhost:5173/inscription?token={token}"
 
         return {
             "message": "Invitation créée avec succès",
             "invitation": invitation,
-            "lien": lien
+            "lien": lien,
+            "email_sent": email_sent
         }
 
     except Exception as e:

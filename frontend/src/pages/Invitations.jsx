@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "../supabaseClient";
 
 function Invitations() {
   const [email, setEmail] = useState("");
@@ -7,7 +8,7 @@ function Invitations() {
   const [erreur, setErreur] = useState("");
   const [message, setMessage] = useState("");
 
-  function envoyerInvitation(e) {
+  /*function envoyerInvitation(e) {
     e.preventDefault();
     setErreur("");
     setMessage("");
@@ -36,6 +37,38 @@ function Invitations() {
         setRole("employe");
       })
       .catch((error) => setErreur(error.message));
+  }*/
+
+
+  async function envoyerInvitation(e) {
+      e.preventDefault();
+      setErreur("");
+      setMessage("");
+      setLien("");
+
+      try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (!sessionData.session) throw new Error("Non connecté");
+
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/invitations/create`, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${sessionData.session.access_token}` // 👈
+              },
+              body: JSON.stringify({ email, role })
+          });
+
+          if (!response.ok) throw new Error("Erreur lors de la création de l'invitation");
+
+          const data = await response.json();
+          setMessage("Invitation créée avec succès. L'email a été envoyé !");
+          setLien(data.lien);
+          setEmail("");
+          setRole("employe");
+      } catch (error) {
+          setErreur(error.message);
+      }
   }
 
   return (
