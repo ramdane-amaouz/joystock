@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { API_URL } from '../../constants/config';
 
 type Produit = {
@@ -12,6 +21,7 @@ type Produit = {
 };
 
 export default function Produits() {
+  const router = useRouter();
   const [produits, setProduits] = useState<Produit[]>([]);
   const [chargement, setChargement] = useState(true);
   const [rafraichissement, setRafraichissement] = useState(false);
@@ -23,7 +33,7 @@ export default function Produits() {
       if (!response.ok) throw new Error('Erreur chargement');
       const data = await response.json();
       setProduits(data);
-    } catch (error) {
+    } catch {
       setErreur('Erreur lors du chargement des produits');
     } finally {
       setChargement(false);
@@ -43,7 +53,17 @@ export default function Produits() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titre}>Produits</Text>
+      {/* Header avec bouton + */}
+      <View style={styles.header}>
+        <Text style={styles.titre}>Produits</Text>
+        <TouchableOpacity
+          style={styles.boutonAjouter}
+          onPress={() => router.push('/(admin)/pages_cachees/ajouter-produit' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.boutonAjouterTxt}>+ Créer</Text>
+        </TouchableOpacity>
+      </View>
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
@@ -78,7 +98,20 @@ export default function Produits() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
   centré: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  titre: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: '#333' },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  titre: { fontSize: 24, fontWeight: 'bold', color: '#333' },
+  boutonAjouter: {
+    backgroundColor: '#333',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  boutonAjouterTxt: { color: 'white', fontSize: 14, fontWeight: '600' },
   erreur: { color: 'red', marginBottom: 12 },
   carte: {
     backgroundColor: 'white',
@@ -88,12 +121,24 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 2
+    elevation: 2,
   },
-  carteHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  carteHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   nom: { fontSize: 16, fontWeight: '600', color: '#333', flex: 1 },
   quantite: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   carteFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  badge: { backgroundColor: '#f0f0f0', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, fontSize: 12, color: '#555' },
-  type: { fontSize: 12, color: '#888' }
+  badge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    fontSize: 12,
+    color: '#555',
+  },
+  type: { fontSize: 12, color: '#888' },
 });

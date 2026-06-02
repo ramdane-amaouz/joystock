@@ -8,6 +8,10 @@ export default function AdminLayout() {
       <Tabs.Screen name="inventaire" options={{ title: 'Inventaire' }} />
       <Tabs.Screen name="statistiques" options={{ title: 'Stats' }} />
       <Tabs.Screen name="profil" options={{ title: 'Profil' }} />
+      
+      <Tabs.Screen name="pages_cachees/demarrer-inventaire" options={{ href: null, title: 'Démarrer inventaire' }} />
+      <Tabs.Screen name="pages_cachees/reception-livraison" options={{ href: null, title: 'Réception livraison' }} />
+
     </Tabs>
   );
 }

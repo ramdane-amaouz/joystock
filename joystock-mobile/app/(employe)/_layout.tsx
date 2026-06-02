@@ -6,6 +6,9 @@ export default function EmployeLayout() {
       <Tabs.Screen name="index" options={{ title: 'Accueil' }} />
       <Tabs.Screen name="produits" options={{ title: 'Produits' }} />
       <Tabs.Screen name="inventaire" options={{ title: 'Inventaire' }} />
+      <Tabs.Screen name="pages_cachees/demarrer-inventaire" options={{ href: null, title: 'Démarrer inventaire' }} />
+      <Tabs.Screen name="pages_cachees/reception-livraison" options={{ href: null, title: 'Réception livraison' }} />
+
       <Tabs.Screen name="profil" options={{ title: 'Profil' }} />
     </Tabs>
   );
