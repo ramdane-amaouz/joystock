@@ -2,17 +2,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { supabase } from '../../supabaseClient';
 
 export default function Accueil() {
-  async function deconnexion() {
+  /*async function deconnexion() {
     await supabase.auth.signOut();
-  }
+  }*/
 
   return (
     <View style={styles.container}>
       <Text style={styles.titre}>Tableau de bord</Text>
 
-      <TouchableOpacity style={styles.boutonDeconnexion} onPress={deconnexion}>
+      {/* <TouchableOpacity style={styles.boutonDeconnexion} onPress={deconnexion}>
         <Text style={styles.boutonTxt}>Se déconnecter</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

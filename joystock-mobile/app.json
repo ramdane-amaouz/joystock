@@ -4,11 +4,11 @@
     "slug": "joystock-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/head-img.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/head-img.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,16 +17,25 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/head-img.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.moumouh69.joystockmobile"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/head-img.png"
     },
     "plugins": [
-      "expo-router"
-    ]
+      "expo-router",
+      "expo-font",
+      "expo-asset"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0b83a18f-cdce-4859-a4a9-7eee150644ec"
+      }
+    }
   }
 }

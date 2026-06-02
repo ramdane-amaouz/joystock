@@ -3,6 +3,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { useSession } from '../hooks/useSession';
 import { useProfile } from '../hooks/useProfile';
 import { View, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
   const { session, chargement } = useSession();
@@ -28,11 +29,17 @@ export default function RootLayout() {
 
   if (chargement) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#333" />
-      </View>
+      <SafeAreaProvider>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#333" />
+        </View>
+      </SafeAreaProvider>
     );
   }
 
-  return <Slot />;
+  return (
+    <SafeAreaProvider>
+      <Slot />
+    </SafeAreaProvider>
+  );
 }
