@@ -203,3 +203,30 @@ def get_matieres_premieres():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.patch("/{produit_id}/seuil-alerte")
+def update_seuil_alerte(produit_id: int, data: dict, user=Depends(get_current_user)):
+    require_admin(user)
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("produits")
+            .update({"seuil_alerte": data["seuil_alerte"]})
+            .eq("id", produit_id)
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Produit introuvable")
+
+        return {
+            "message": "Seuil d'alerte mis à jour",
+            "produit": response.data[0]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

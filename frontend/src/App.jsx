@@ -114,7 +114,7 @@ function App() {
                 </div>
                 <div style={{ flex: 1, padding: "2rem" }}>
                   <Routes>
-                    <Route path="/" element={<Accueil />} />
+                    <Route path="/" element={<Accueil admin={admin} />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/produits" element={<Produits />} />
                     <Route path="/inventaire" element={<Inventaire />} />

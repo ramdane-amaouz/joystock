@@ -46,7 +46,7 @@ def test_produits():
     - auth : pour gérer l'authentification des utilisateurs et la sécurisation des routes
     - recettes : pour gérer les recettes et les ingrédients
 """
-from routers import produits, inventaires, stats, auth, invitations, profiles, recettes
+from routers import produits, inventaires, stats, auth, invitations, profiles, recettes, ventes
 
 
 """
@@ -58,6 +58,7 @@ app.include_router(invitations.router)
 app.include_router(profiles.router)
 app.include_router(stats.router)
 app.include_router(recettes.router)
+app.include_router(ventes.router)
 #app.include_router(auth.router)
 
 

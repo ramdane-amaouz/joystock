@@ -61,13 +61,13 @@ function Menu({admin}) {
         )}
 
 
-        {admin && (
+        {/*admin && (
         <li>
           <Link to="/parametres" style={{ display: "block", color: "#fff", textDecoration: "none", padding: "1rem" }}>
             Parametres
           </Link>
         </li>
-        )}
+        )*/}
 
         {admin && (
         <li>

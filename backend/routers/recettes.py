@@ -94,6 +94,12 @@ def get_recette(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+
+
+
+
 @router.post("/add")
 def add_recette(data: dict, user = Depends(get_current_user)):
     require_admin(user)
