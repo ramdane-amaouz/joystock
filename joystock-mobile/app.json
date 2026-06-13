@@ -2,6 +2,7 @@
   "expo": {
     "name": "joystock-mobile",
     "slug": "joystock-mobile",
+    "scheme": "joystock",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/head-img.png",

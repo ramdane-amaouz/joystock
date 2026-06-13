@@ -9,7 +9,15 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://tihgmqjtsojvldxqevda.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGdtcWp0c29qdmxkeHFldmRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjE1NTYsImV4cCI6MjA5MzU5NzU1Nn0.dxa_xomJ8wtCvr-kAARG855rio8ve4tmMnaiyzvGCB4",
+        "EXPO_PUBLIC_API_URL": "https://joystock.onrender.com"
+      }
     },
     "production": {
       "autoIncrement": true
