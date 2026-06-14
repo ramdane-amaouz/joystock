@@ -9,9 +9,12 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+
+import { Ionicons } from '@expo/vector-icons';
+
 
 type Categorie = { id: number; nom: string };
 type Unite = { id: number; nom: string };
@@ -135,8 +138,18 @@ export default function AjouterProduit() {
   }
 
   return (
+
+    
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titre}>Ajouter un produit</Text>
+      {/* <Text style={styles.titre}>Ajouter un produit</Text> */}
+      <Stack.Screen options={{
+        title: 'Ajouter un produit',
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => router.push('/(admin)/produits')} style={{ marginLeft: 8 }}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+        )
+      }} />
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 

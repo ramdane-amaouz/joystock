@@ -42,6 +42,7 @@ export default function AdminLayout() {
     <>
       <Tabs
         screenOptions={{
+//          headerShown: false,
           tabBarActiveTintColor: '#333',
           tabBarInactiveTintColor: '#8e8e8f',
           tabBarStyle: {
@@ -94,8 +95,10 @@ export default function AdminLayout() {
           }}
         />
 
+        <Tabs.Screen name="pages_cachees" options={{ href: null, headerShown: false }} />
+
         {/* Pages cachées */}
-        <Tabs.Screen name="pages_cachees/ajout-produit"       options={{ href: null, title: 'Ajouter un produit' }} />
+       {/* <Tabs.Screen name="pages_cachees/ajout-produit"       options={{ href: null, title: 'Ajouter un produit' }} />
         <Tabs.Screen name="pages_cachees/demarrer-inventaire" options={{ href: null, title: 'Démarrer inventaire' }} />
         <Tabs.Screen name="pages_cachees/reception-livraison" options={{ href: null, title: 'Réception livraison' }} />
         <Tabs.Screen name="pages_cachees/statistiques"        options={{ href: null, title: 'Statistiques' }} />
@@ -103,7 +106,7 @@ export default function AdminLayout() {
         <Tabs.Screen name="pages_cachees/recettes"            options={{ href: null, title: 'Recettes' }} />
         <Tabs.Screen name="pages_cachees/invitations"         options={{ href: null, title: 'Invitations' }} />
         <Tabs.Screen name="pages_cachees/ajouter-recette"     options={{ href: null, title: 'Ajouter recette' }} />
-        <Tabs.Screen name="pages_cachees/modifier-recette"    options={{ href: null, title: 'Modifier recette' }} />
+        <Tabs.Screen name="pages_cachees/modifier-recette"    options={{ href: null, title: 'Modifier recette' }} />  */}
       </Tabs>
 
       {/* Menu vertical "Plus" */}

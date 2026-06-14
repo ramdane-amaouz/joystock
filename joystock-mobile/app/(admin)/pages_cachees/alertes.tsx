@@ -6,9 +6,13 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
+import { router } from 'expo-router/build/exports';
+import { Stack } from 'expo-router/build/layouts/Stack';
 
 type Alerte = {
   produit_id: number;
@@ -57,8 +61,16 @@ export default function Alertes() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titre}>Alertes de stock</Text>
+      {/* <Text style={styles.titre}>Alertes de stock</Text> */}
 
+<Stack.Screen options={{
+  title: 'Alertes de stock',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       {alertes.length === 0 ? (

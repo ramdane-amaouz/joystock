@@ -9,9 +9,10 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 type Ingredient = {
   produit_ingredient_id: number;
@@ -95,7 +96,17 @@ export default function Recettes() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.titre}>Recettes</Text>
+        {/* <Text style={styles.titre}>Recettes</Text> */}
+              
+      <Stack.Screen options={{
+        title: 'Recettes',
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => router.push('/(admin)/')} style={{ marginLeft: 8 }}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+        )
+      }} />
+
         <TouchableOpacity
           style={styles.boutonAjouter}
           onPress={() => router.push('/(admin)/pages_cachees/ajouter-recette' as any)}

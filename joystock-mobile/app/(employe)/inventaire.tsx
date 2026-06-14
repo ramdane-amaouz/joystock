@@ -14,7 +14,7 @@ export default function Inventaire() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titre}>Inventaire</Text>
+      {/* <Text style={styles.titre}>Inventaire</Text> */}
 
       <TouchableOpacity
         style={styles.carte}

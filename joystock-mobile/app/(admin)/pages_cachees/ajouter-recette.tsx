@@ -9,9 +9,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 type Produit = {
   produit_id: number;
@@ -110,7 +111,15 @@ export default function AjouterRecette() {
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titre}>Créer une recette</Text>
+      <Stack.Screen options={{
+  title: 'Créer une recette',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/recettes')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
+      {/*<Text style={styles.titre}>Créer une recette</Text>*/}
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
@@ -125,7 +134,7 @@ export default function AjouterRecette() {
       />
 
       {/* Ingrédients */}
-      <Text style={styles.label}>Ingrédients</Text>
+      {/* <Text style={styles.label}>Ingrédients</Text> */}
 
       {ingredients.map((ing, index) => {
         const produitChoisi = produits.find(

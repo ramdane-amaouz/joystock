@@ -41,7 +41,7 @@ export default function Profil() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titre}>Mon profil</Text>
+      {/* <Text style={styles.titre}>Mon profil</Text> */}
 
       {profil && (
         <View style={styles.carte}>

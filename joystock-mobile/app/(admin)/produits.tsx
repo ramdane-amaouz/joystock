@@ -114,7 +114,7 @@ export default function Produits() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.titre}>Produits</Text>
+        {/* <Text style={styles.titre}>Produits</Text> */}
         <TouchableOpacity
           style={styles.boutonAjouter}
           onPress={() => router.push('/(admin)/pages_cachees/ajout-produit' as any)}

@@ -11,6 +11,9 @@ import {
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
+import { router } from 'expo-router/build/exports';
+import { Stack } from 'expo-router/build/layouts/Stack';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_WIDTH = SCREEN_WIDTH - 64;
@@ -166,8 +169,17 @@ export default function Statistiques() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.titre}>Statistiques</Text>
+      {/* <Text style={styles.titre}>Statistiques</Text> */}
 
+
+<Stack.Screen options={{
+  title: 'Statistiques',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       {/* ── Stock théorique ───────────────────────────────────────────────── */}

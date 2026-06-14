@@ -11,9 +11,11 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
+
 
 type Produit = {
   produit_id: number;
@@ -114,12 +116,20 @@ export default function DemarrerInventaire() {
   }
 
   return (
+    
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.titre}>Démarrer un inventaire</Text>
-
+      {/* <Text style={styles.titre}>Démarrer un inventaire</Text> */}
+<Stack.Screen options={{
+  title: 'Démarrer un inventaire',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/inventaire')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       {/* En-tête tableau */}

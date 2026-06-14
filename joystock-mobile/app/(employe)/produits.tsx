@@ -43,7 +43,7 @@ export default function Produits() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titre}>Produits</Text>
+      {/* <Text style={styles.titre}>Produits</Text> */}
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 

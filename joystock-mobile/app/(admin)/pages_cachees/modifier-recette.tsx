@@ -9,9 +9,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 type Produit = {
   id: number;
@@ -136,7 +137,16 @@ export default function ModifierRecette() {
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titre}>Modifier la recette</Text>
+      {/* <Text style={styles.titre}>Modifier la recette</Text> */}
+      <Stack.Screen options={{
+  title: 'Modifier la recette',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/recettes')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
+
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 

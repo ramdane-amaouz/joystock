@@ -11,9 +11,10 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 type Produit = {
   produit_id: number;
@@ -122,7 +123,16 @@ export default function ReceptionLivraison() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.titre}>Réception de livraison</Text>
+      {/* <Text style={styles.titre}>Réception de livraison</Text> */}
+
+<Stack.Screen options={{
+  title: 'Réception de livraison',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/inventaire')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
 
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 

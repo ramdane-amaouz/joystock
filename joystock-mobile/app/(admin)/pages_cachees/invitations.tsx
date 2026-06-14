@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
+import { router } from 'expo-router/build/exports';
+import { Stack } from 'expo-router/build/layouts/Stack';
 
 const ROLES = [
   { valeur: 'employe', label: 'Employé' },
@@ -67,8 +70,16 @@ export default function Invitations() {
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titre}>Inviter un employé</Text>
+      {/* <Text style={styles.titre}>Inviter un employé</Text> */}
 
+<Stack.Screen options={{
+  title: 'Inviter un employé',
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => router.push('/(admin)/')} style={{ marginLeft: 8 }}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+    </TouchableOpacity>
+  )
+}} />
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       <View style={styles.carte}>
