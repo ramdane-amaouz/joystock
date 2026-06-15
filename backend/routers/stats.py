@@ -127,3 +127,37 @@ def get_alertes_stock(user=Depends(get_current_user)):
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+"""@router.get("/inventaires_liste")
+def get_inventaires_liste(user=Depends(get_current_user)):
+    require_admin(user)
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_inventaires_liste")
+            .select("*")
+            .order("date_creation", desc=True)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/inventaires_par_utilisateur")
+def get_inventaires_par_utilisateur(user=Depends(get_current_user)):
+    require_admin(user)
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_inventaires_details")
+            .select("*")
+            .order("date_creation", desc=True)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))"""

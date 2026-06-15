@@ -36,63 +36,47 @@ function ReceptionMarchandise() {
     setErreur("");
     setMessage("");
 
-    const { data, error } = await supabase.auth.getUser();
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
 
-    if (error || !data.user) {
-      setErreur("Utilisateur non connecté");
-      return;
-    }
+      if (!sessionData.session) {
+        setErreur("Utilisateur non connecté");
+        return;
+      }
 
-    const lignes = produits
-      .filter(
-        (produit) =>
-          produit.quantite_commandee !== "" || produit.quantite_recue !== ""
-      )
-      .map((produit) => ({
-        produit_id: produit.produit_id,
-        quantite_commandee:
-          produit.quantite_commandee === ""
-            ? 0
-            : Number(produit.quantite_commandee),
-        quantite:
-          produit.quantite_recue === ""
-            ? 0
-            : Number(produit.quantite_recue)
-      }));
+      const lignes = produits
+        .filter(p => p.quantite_commandee !== "" || p.quantite_recue !== "")
+        .map(p => ({
+          produit_id: p.produit_id,
+          quantite_commandee: p.quantite_commandee === "" ? 0 : Number(p.quantite_commandee),
+          quantite: p.quantite_recue === "" ? 0 : Number(p.quantite_recue)
+        }));
 
-    if (lignes.length === 0) {
-      setErreur("Veuillez saisir au moins une ligne de réception.");
-      return;
-    }
+      if (lignes.length === 0) {
+        setErreur("Veuillez saisir au moins une ligne de réception.");
+        return;
+      }
 
-    fetch(`${import.meta.env.VITE_API_URL}/inventaires/reception-livraison`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-      //  user_id: data.user.id,
-        lignes: lignes
-      })
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Erreur lors de l'enregistrement de la réception");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/inventaires/reception-livraison`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({ lignes })
         }
-        return response.json();
-      })
-      .then(() => {
-        setMessage("Réception enregistrée avec succès.");
+      );
 
-        setProduits((prev) =>
-          prev.map((produit) => ({
-            ...produit,
-            quantite_commandee: "",
-            quantite_recue: ""
-          }))
-        );
-      })
-      .catch((error) => setErreur(error.message));
+      if (!response.ok) throw new Error("Erreur lors de l'enregistrement de la réception");
+
+      setMessage("Réception enregistrée avec succès.");
+      setProduits(prev => prev.map(p => ({ ...p, quantite_commandee: "", quantite_recue: "" })));
+
+    } catch (error) {
+      setErreur(error.message);
+    }
   }
 
   return (

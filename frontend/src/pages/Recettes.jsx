@@ -94,6 +94,10 @@ function Recettes() {
         </Link>
       </div>
 
+      <Link to="/saisir-ventes" style={{ color: "#007BFF", textDecoration: "none", fontSize: "1.1rem" }}>
+        + Saisir des ventes
+      </Link>
+
       {recettes.length === 0 ? (
         <p>Aucune recette créée pour le moment.</p>
       ) : (

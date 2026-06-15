@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
-from core.security import get_current_user
+from core.security import get_current_user, require_admin
 
 router = APIRouter(prefix="/inventaires", tags=["inventaires"])
 
@@ -100,5 +100,60 @@ def reception_livraison(
             "lignes": lignes_response.data
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/inventaires_liste")
+def get_inventaires_liste(user=Depends(get_current_user)):
+    require_admin(user)
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_inventaires_liste")
+            .select("*")
+            .order("date_inventaire", desc=True)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+"""@router.get("/inventaires/{inventaire_id}/details")
+def get_inventaire_details(inventaire_id: int, user=Depends(get_current_user)):
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_inventaires_details")
+            .select("*")
+            .eq("inventaire_id", inventaire_id)
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Inventaire introuvable")
+        return response.data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))"""
+
+
+@router.get("/{inventaire_id}/details")
+def get_inventaire_details(inventaire_id: int, user=Depends(get_current_user)):
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_inventaires_details")
+            .select("*")
+            .eq("inventaire_id", inventaire_id)
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Inventaire introuvable")
+        return response.data
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

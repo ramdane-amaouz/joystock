@@ -32,7 +32,7 @@ function DemarrerInventaire() {
     );
   }
 
-  async function terminerInventaire(e) {
+  /*async function terminerInventaire(e) {
     e.preventDefault();
     setErreur("");
     setMessage("");
@@ -55,7 +55,8 @@ function DemarrerInventaire() {
     fetch(`${import.meta.env.VITE_API_URL}/inventaires/demarrer-inventaire`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionData.session.access_token}`        
       },
       body: JSON.stringify({
      //   user_id: data.user.id,
@@ -72,6 +73,44 @@ function DemarrerInventaire() {
         setMessage("Inventaire enregistré avec succès.");
       })
       .catch((error) => setErreur(error.message));
+  }*/
+
+  async function terminerInventaire(e) {
+    e.preventDefault();
+    setErreur("");
+    setMessage("");
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        setErreur("Utilisateur non connecté");
+        return;
+      }
+
+      const lignes = produits.map((produit) => ({
+        produit_id: produit.produit_id,
+        quantite: Number(produit.nouvelle_quantite)
+      }));
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/inventaires/demarrer-inventaire`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({ lignes })
+        }
+      );
+
+      if (!response.ok) throw new Error("Erreur lors de l'enregistrement");
+
+      setMessage("Inventaire enregistré avec succès.");
+    } catch (error) {
+      setErreur(error.message);
+    }
   }
 
   return (

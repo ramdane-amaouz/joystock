@@ -80,13 +80,7 @@ export default function AdminLayout() {
             tabBarIcon: ({ color, size }) => <Ionicons name="clipboard-outline" size={size} color={color} />,
           }}
         />
-        <Tabs.Screen
-          name="profil"
-          options={{
-            title: 'Profil',
-            tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
-          }}
-        />
+
         <Tabs.Screen
           name="plus"
           options={{
@@ -94,6 +88,15 @@ export default function AdminLayout() {
             tabBarButton: () => <BoutonPlus onPress={() => setMenuOuvert(true)} />,
           }}
         />
+
+        <Tabs.Screen
+          name="profil"
+          options={{
+            title: 'Profil',
+            tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          }}
+        />
+        
 
         <Tabs.Screen name="pages_cachees" options={{ href: null, headerShown: false }} />
 

@@ -14,6 +14,17 @@ import {
 } from "recharts";
 
 function Statistiques() {
+
+
+  const [ongletActif, setOngletActif] = useState("stock");
+
+  const ONGLETS = [
+    { id: "stock",       label: "Stock" },
+    { id: "consommation",label: "Consommation" },
+    { id: "ventes",      label: "Ventes" },
+    { id: "evolution",    label: "Évolution des ventes" },
+  ];
+
   const [donnees, setDonnees] = useState([]);
   const [produitSelectionne, setProduitSelectionne] = useState("");
   const [erreur, setErreur] = useState("");
@@ -106,13 +117,48 @@ function Statistiques() {
   if (chargement) return <p>Chargement des statistiques...</p>;
 
   return (
+
     <div>
       <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>Statistiques</h2>
 
       {erreur && <p style={{ color: "red" }}>{erreur}</p>}
 
+      <div style={{
+  position: "sticky",
+  top: 0,
+  zIndex: 10,
+  backgroundColor: "white",
+  borderBottom: "1px solid #eee",
+  display: "flex",
+  gap: "0.5rem",
+  padding: "0.75rem 0",
+  marginBottom: "2rem"
+}}>
+  {ONGLETS.map(onglet => (
+    <button
+      key={onglet.id}
+      onClick={() => {
+        setOngletActif(onglet.id);
+        document.getElementById(onglet.id)?.scrollIntoView({ behavior: "smooth" });
+      }}
+      style={{
+        padding: "0.5rem 1.25rem",
+        borderRadius: "20px",
+        border: "1px solid #ccc",
+        backgroundColor: ongletActif === onglet.id ? "#333" : "white",
+        color: ongletActif === onglet.id ? "white" : "#333",
+        cursor: "pointer",
+        fontWeight: ongletActif === onglet.id ? "bold" : "normal",
+        fontSize: "0.9rem"
+      }}
+    >
+      {onglet.label}
+    </button>
+  ))}
+</div>
       {/* Stock théorique */}
       <div
+        id = "stock"
         style={{
           width: "100%",
           backgroundColor: "white",
@@ -165,7 +211,7 @@ function Statistiques() {
       </div>
 
       {/* Consommation par produit */}
-      <div style={{ marginBottom: "2rem", maxWidth: "400px" }}>
+      <div id="consommation" style={{ marginBottom: "2rem", maxWidth: "400px" }}>
         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
           Produit
         </label>
@@ -216,7 +262,7 @@ function Statistiques() {
       </div>
 
       {/* Total vendu par recette */}
-      <div style={{ width: "100%", height: "500px", backgroundColor: "white", padding: "2rem", borderRadius: "10px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)", marginTop: "3rem" }}>
+      <div id="ventes" style={{ width: "100%", height: "500px", backgroundColor: "white", padding: "2rem", borderRadius: "10px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)", marginTop: "3rem" }}>
         <h3 style={{ marginBottom: "1rem" }}>Total vendu par recette</h3>
         {totalVentesRecettes.length === 0 ? (
           <p>Aucune vente enregistrée.</p>

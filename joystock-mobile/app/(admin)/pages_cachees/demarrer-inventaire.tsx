@@ -122,14 +122,14 @@ export default function DemarrerInventaire() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* <Text style={styles.titre}>Démarrer un inventaire</Text> */}
-<Stack.Screen options={{
-  title: 'Démarrer un inventaire',
-  headerLeft: () => (
-    <TouchableOpacity onPress={() => router.push('/(admin)/inventaire')} style={{ marginLeft: 8 }}>
-      <Ionicons name="arrow-back" size={24} color="#333" />
-    </TouchableOpacity>
-  )
-}} />
+      <Stack.Screen options={{
+        title: 'Démarrer un inventaire',
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => router.push('/(admin)/inventaire')} style={{ marginLeft: 8 }}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+        )
+      }} />
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       {/* En-tête tableau */}
