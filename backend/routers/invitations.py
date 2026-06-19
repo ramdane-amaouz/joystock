@@ -118,6 +118,9 @@ def get_invitation(token: str):
             raise HTTPException(status_code=404, detail="Invitation introuvable")
 
         return response.data[0]
+    
+    except HTTPException:
+        raise
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

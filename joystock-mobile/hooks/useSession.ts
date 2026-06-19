@@ -6,8 +6,25 @@ export function useSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [chargement, setChargement] = useState(true);
 
-  useEffect(() => {
+  /*useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setChargement(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);*/
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        // Token invalide — on déconnecte proprement
+        supabase.auth.signOut();
+      }
       setSession(data.session);
       setChargement(false);
     });

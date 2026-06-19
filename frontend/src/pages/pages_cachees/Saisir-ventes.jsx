@@ -218,7 +218,7 @@ function SaisirVentes() {
               width: "100%"
             }}
           >
-            + Ajouter une vente
+            + Ajouter une vente (juste pour les tests)
           </button>
         </div>
 
