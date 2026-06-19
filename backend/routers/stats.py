@@ -161,3 +161,34 @@ def get_inventaires_par_utilisateur(user=Depends(get_current_user)):
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))"""
+
+@router.get("/ecarts-inventaire")
+def get_ecarts_inventaire(user=Depends(admin_user)):
+    try:
+        # Récupérer seulement le dernier inventaire de stock
+        dernier = (
+            supabase
+            .schema("joystock")
+            .table("inventaires")
+            .select("id")
+            .eq("type", "stock")
+            .order("date_inventaire", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if not dernier.data:
+            return []
+        
+        dernier_id = dernier.data[0]["id"]
+        
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_ecarts_inventaire")
+            .select("*")
+            .eq("inventaire_id", dernier_id)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -12,6 +12,7 @@ function Accueil({ admin }) {
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(true);
   const [topRecette, setTopRecette] = useState(null);
+  const [ecarts, setEcarts] = useState([]);
 
   async function fetchAvecToken(url) {
     const { data } = await supabase.auth.getSession();
@@ -26,7 +27,6 @@ function Accueil({ admin }) {
   useEffect(() => {
     async function chargerDonnees() {
       try {
-        // Données communes
         const [count, unites, produitsData] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/produits/count`).then(r => r.json()),
           fetch(`${import.meta.env.VITE_API_URL}/produits/total-unites`).then(r => r.json()),
@@ -37,18 +37,18 @@ function Accueil({ admin }) {
         setStockTotal(unites.total_unites);
         setProduits(produitsData);
 
-        // Données admin uniquement
         if (admin) {
-          const [alertesData, ventesJour, topConso, topRecettes] = await Promise.all([
+          const [alertesData, ventesJour, topConso, topRecettes, ecartsData] = await Promise.all([
             fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/alertes-stock`),
             fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/ventes/par-jour`),
             fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/derniere-consommation`),
-            fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/ventes/total-recettes`)
+            fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/ventes/total-recettes`),
+            fetchAvecToken(`${import.meta.env.VITE_API_URL}/stats/ecarts-inventaire`)
           ]);
 
           setAlertes(alertesData);
+          setEcarts(ecartsData);
 
-          // Total ventes aujourd'hui
           const aujourd_hui = new Date().toLocaleDateString("fr-FR");
           const ventesAujourdhui = ventesJour.filter(v =>
             new Date(v.jour).toLocaleDateString("fr-FR") === aujourd_hui
@@ -56,10 +56,7 @@ function Accueil({ admin }) {
           const total = ventesAujourdhui.reduce((acc, v) => acc + Number(v.quantite_vendue), 0);
           setTotalVentesJour(total);
 
-          // Top produit consommé
           if (topConso.length > 0) setTopProduit(topConso[0]);
-
-          // Top recette vendue
           if (topRecettes.length > 0) setTopRecette(topRecettes[0]);
         }
 
@@ -84,6 +81,12 @@ function Accueil({ admin }) {
     boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
   };
 
+  // Écarts significatifs — on ne montre que ceux > 10% d'écart relatif
+  const ecartsSignificatifs = ecarts.filter(e =>
+    e.stock_theorique_attendu > 0 &&
+    Math.abs(e.ecart / e.stock_theorique_attendu) > 0.1
+  );
+
   return (
     <div>
       <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>Tableau de bord</h2>
@@ -102,7 +105,6 @@ function Accueil({ admin }) {
           <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>{stockTotal} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>unités</span></p>
         </div>
 
-        {/* Carte alertes — admin seulement */}
         {admin && (
           <div style={{
             ...carteStyle,
@@ -121,24 +123,41 @@ function Accueil({ admin }) {
           </div>
         )}
 
-        {/* Ventes du jour — admin seulement */}
         {admin && (
           <div style={carteStyle}>
             <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Ventes aujourd'hui</p>
             <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>{totalVentesJour}</p>
           </div>
         )}
+
+        {/* Carte écarts d'inventaire — admin seulement */}
+        {admin && (
+          <div style={{
+            ...carteStyle,
+            backgroundColor: ecartsSignificatifs.length > 0 ? "#fffbf0" : "white",
+            border: ecartsSignificatifs.length > 0 ? "1px solid #f6c90e" : "none"
+          }}>
+            <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Écarts d'inventaire</p>
+            <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0, color: ecartsSignificatifs.length > 0 ? "#b7791f" : "#38a169" }}>
+              {ecartsSignificatifs.length}
+            </p>
+            {ecartsSignificatifs.length > 0 && (
+              <p style={{ fontSize: "0.8rem", color: "#b7791f", margin: "0.25rem 0 0" }}>
+                produit{ecartsSignificatifs.length > 1 ? "s" : ""} avec écart &gt; 10%
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {admin && topRecette && (
-        <div style={carteStyle}>
+        <div style={{ ...carteStyle, marginBottom: "1.5rem" }}>
           <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Recette la plus vendue</p>
           <p style={{ fontWeight: "bold", fontSize: "1.1rem", margin: 0 }}>{topRecette.recette_nom}</p>
           <p style={{ color: "#555", fontSize: "0.9rem", margin: "0.25rem 0 0" }}>{topRecette.total_vendu} vendues</p>
         </div>
       )}
 
-      {/* Top produit consommé — admin seulement */}
       {admin && topProduit && (
         <div style={{
           ...carteStyle,
@@ -160,7 +179,56 @@ function Accueil({ admin }) {
         </div>
       )}
 
-      {/* Alertes détail — admin seulement */}
+      {/* Bloc écarts d'inventaire — admin seulement */}
+      {admin && ecartsSignificatifs.length > 0 && (
+        <div style={{
+          backgroundColor: "#fffbf0",
+          border: "1px solid #f6c90e",
+          borderRadius: "10px",
+          padding: "1.5rem",
+          marginBottom: "2rem"
+        }}>
+          <h3 style={{ marginBottom: "1rem", color: "#b7791f" }}>
+            📊 Écarts détectés lors du dernier inventaire
+          </h3>
+          <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "1rem" }}>
+            {new Date(ecartsSignificatifs[0].date_inventaire).toLocaleDateString("fr-FR", {
+              day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+            })}
+          </p>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Produit</th>
+                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Théorique attendu</th>
+                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Réel compté</th>
+                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Écart</th>
+                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Unité</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ecartsSignificatifs.slice(0, 5).map((e) => (
+                <tr key={e.produit_id}>
+                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem", fontWeight: "bold" }}>{e.produit_nom}</td>
+                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.stock_theorique_attendu}</td>
+                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.quantite_reelle}</td>
+                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem", color: e.ecart < 0 ? "#e53e3e" : "#38a169", fontWeight: "bold" }}>
+                    {e.ecart > 0 ? "+" : ""}{e.ecart}
+                  </td>
+                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.unite}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {ecartsSignificatifs.length > 5 && (
+            <p style={{ fontSize: "0.9rem", color: "#b7791f", marginTop: "0.75rem" }}>
+              + {ecartsSignificatifs.length - 5} autre{ecartsSignificatifs.length - 5 > 1 ? "s" : ""} produit{ecartsSignificatifs.length - 5 > 1 ? "s" : ""} avec écart significatif
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Alertes détail */}
       {admin && alertes.length > 0 && (
         <div style={{
           backgroundColor: "#fff5f5",
@@ -190,11 +258,9 @@ function Accueil({ admin }) {
               ))}
             </tbody>
           </table>
-          {alertes.length > 0 && (
-            <Link to="/alertes" style={{ fontSize: "0.9rem", color: "#e53e3e", textDecoration: "underline", marginTop: "0.75rem", display: "block" }}>
-              Voir toutes les alertes ({alertes.length}) →
-            </Link>
-          )}
+          <Link to="/alertes" style={{ fontSize: "0.9rem", color: "#e53e3e", textDecoration: "underline", marginTop: "0.75rem", display: "block" }}>
+            Voir toutes les alertes ({alertes.length}) →
+          </Link>
         </div>
       )}
 

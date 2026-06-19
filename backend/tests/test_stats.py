@@ -179,3 +179,73 @@ class TestStats:
             response = client_admin.get("/stats/ventes/par-semaine")
             assert response.status_code == 200
             assert response.json()[0]["quantite_vendue"] == 12
+
+    # ── Écarts d'inventaire ───────────────────────────────────────────────────
+
+    def test_ecarts_inventaire_sans_auth_refuse(self, client_non_authentifie):
+        """Sans token, les écarts sont refusés."""
+        response = client_non_authentifie.get("/stats/ecarts-inventaire")
+        assert response.status_code == 422
+
+    def test_ecarts_inventaire_employe_refuse(self, client_employe):
+        """Un employé ne peut pas consulter les écarts."""
+        response = client_employe.get("/stats/ecarts-inventaire")
+        assert response.status_code == 403
+
+    def test_ecarts_inventaire_admin_succes(self, client_admin):
+        """Un admin peut consulter les écarts du dernier inventaire."""
+        with patch("routers.stats.supabase") as mock_supabase:
+            # Mock du dernier inventaire
+            mock_inventaire = MagicMock()
+            mock_inventaire.data = [{"id": 27}]
+
+            # Mock des écarts
+            mock_ecarts = MagicMock()
+            mock_ecarts.data = [
+                {
+                    "inventaire_id": 27,
+                    "date_inventaire": "2026-06-16T07:31:32",
+                    "produit_id": 22,
+                    "produit_nom": "Pain tacos",
+                    "categorie": "Pain",
+                    "unite": "unite",
+                    "quantite_reelle": 0.0,
+                    "stock_theorique_attendu": 172.0,
+                    "ecart": -172.0
+                },
+                {
+                    "inventaire_id": 27,
+                    "date_inventaire": "2026-06-16T07:31:32",
+                    "produit_id": 36,
+                    "produit_nom": "Coca cola",
+                    "categorie": "Boisson",
+                    "unite": "unite",
+                    "quantite_reelle": 10.0,
+                    "stock_theorique_attendu": 200.0,
+                    "ecart": -190.0
+                }
+            ]
+
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .eq.return_value.order.return_value.limit.return_value.execute.return_value = mock_inventaire
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .eq.return_value.execute.return_value = mock_ecarts
+
+            response = client_admin.get("/stats/ecarts-inventaire")
+            assert response.status_code == 200
+            assert isinstance(response.json(), list)
+            assert len(response.json()) == 2
+            assert response.json()[0]["produit_nom"] == "Pain tacos"
+            assert response.json()[0]["ecart"] == -172.0
+
+    def test_ecarts_inventaire_liste_vide(self, client_admin):
+        """Retourne une liste vide si pas d'inventaire de stock."""
+        with patch("routers.stats.supabase") as mock_supabase:
+            mock_inventaire = MagicMock()
+            mock_inventaire.data = []
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .eq.return_value.order.return_value.limit.return_value.execute.return_value = mock_inventaire
+
+            response = client_admin.get("/stats/ecarts-inventaire")
+            assert response.status_code == 200
+            assert response.json() == []
