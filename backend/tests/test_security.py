@@ -1,3 +1,5 @@
+#from xmlrpc import client
+
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -120,3 +122,9 @@ class TestSecurity:
             for route in routes_publiques:
                 response = client.get(route)
                 assert response.status_code == 200, f"Route publique {route} devrait retourner 200 sans token"
+
+    def test_route_protegee_avec_token_forge(self):
+        client = TestClient(app)  # ← ajouter cette ligne
+        faux_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYWtlLXVzZXIiLCJyb2xlIjoiYWRtaW4ifQ.signature_forgee"
+        response = client.get("/stats/previsions", headers={"Authorization": f"Bearer {faux_token}"})
+        assert response.status_code == 401

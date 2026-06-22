@@ -10,7 +10,13 @@ app = FastAPI(title="JoyStock API")
 app.add_middleware(
     CORSMiddleware,
     #allow_origins=[ "http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_origins=["*"],  # Permettre toutes les origines (à restreindre en production)
+    #allow_origins=["*"],  # Permettre toutes les origines (à restreindre en production)
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:8080",
+        "https://joystock.vercel.app"  # ← remplace par ton vrai domaine Vercel
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
