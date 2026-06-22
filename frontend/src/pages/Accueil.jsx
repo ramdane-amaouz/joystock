@@ -132,21 +132,24 @@ function Accueil({ admin }) {
 
         {/* Carte écarts d'inventaire — admin seulement */}
         {admin && (
-          <div style={{
-            ...carteStyle,
-            backgroundColor: ecartsSignificatifs.length > 0 ? "#fffbf0" : "white",
-            border: ecartsSignificatifs.length > 0 ? "1px solid #f6c90e" : "none"
-          }}>
-            <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Écarts d'inventaire</p>
-            <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0, color: ecartsSignificatifs.length > 0 ? "#b7791f" : "#38a169" }}>
-              {ecartsSignificatifs.length}
-            </p>
-            {ecartsSignificatifs.length > 0 && (
-              <p style={{ fontSize: "0.8rem", color: "#b7791f", margin: "0.25rem 0 0" }}>
-                produit{ecartsSignificatifs.length > 1 ? "s" : ""} avec écart &gt; 10%
+          <Link to="/alertes" style={{ flex: "1", minWidth: "180px", textDecoration: "none" }}>
+            <div style={{
+              ...carteStyle,
+              backgroundColor: ecartsSignificatifs.length > 0 ? "#fffbf0" : "white",
+              border: ecartsSignificatifs.length > 0 ? "1px solid #f6c90e" : "none",
+              cursor: "pointer"
+            }}>
+              <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Écarts d'inventaire</p>
+              <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0, color: ecartsSignificatifs.length > 0 ? "#b7791f" : "#38a169" }}>
+                {ecartsSignificatifs.length}
               </p>
-            )}
-          </div>
+              {ecartsSignificatifs.length > 0 && (
+                <p style={{ fontSize: "0.8rem", color: "#b7791f", margin: "0.25rem 0 0" }}>
+                  produit{ecartsSignificatifs.length > 1 ? "s" : ""} avec écart &gt; 10%
+                </p>
+              )}
+            </div>
+          </Link>
         )}
       </div>
 
@@ -176,91 +179,6 @@ function Accueil({ admin }) {
               {topProduit.consommation_estimee} {topProduit.unite}
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Bloc écarts d'inventaire — admin seulement */}
-      {admin && ecartsSignificatifs.length > 0 && (
-        <div style={{
-          backgroundColor: "#fffbf0",
-          border: "1px solid #f6c90e",
-          borderRadius: "10px",
-          padding: "1.5rem",
-          marginBottom: "2rem"
-        }}>
-          <h3 style={{ marginBottom: "1rem", color: "#b7791f" }}>
-            📊 Écarts détectés lors du dernier inventaire
-          </h3>
-          <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "1rem" }}>
-            {new Date(ecartsSignificatifs[0].date_inventaire).toLocaleDateString("fr-FR", {
-              day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-            })}
-          </p>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Produit</th>
-                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Théorique attendu</th>
-                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Réel compté</th>
-                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Écart</th>
-                <th style={{ borderBottom: "1px solid #f6c90e", padding: "0.5rem", textAlign: "left" }}>Unité</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ecartsSignificatifs.slice(0, 5).map((e) => (
-                <tr key={e.produit_id}>
-                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem", fontWeight: "bold" }}>{e.produit_nom}</td>
-                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.stock_theorique_attendu}</td>
-                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.quantite_reelle}</td>
-                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem", color: e.ecart < 0 ? "#e53e3e" : "#38a169", fontWeight: "bold" }}>
-                    {e.ecart > 0 ? "+" : ""}{e.ecart}
-                  </td>
-                  <td style={{ borderBottom: "1px solid #fef3c7", padding: "0.5rem" }}>{e.unite}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {ecartsSignificatifs.length > 5 && (
-            <p style={{ fontSize: "0.9rem", color: "#b7791f", marginTop: "0.75rem" }}>
-              + {ecartsSignificatifs.length - 5} autre{ecartsSignificatifs.length - 5 > 1 ? "s" : ""} produit{ecartsSignificatifs.length - 5 > 1 ? "s" : ""} avec écart significatif
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Alertes détail */}
-      {admin && alertes.length > 0 && (
-        <div style={{
-          backgroundColor: "#fff5f5",
-          border: "1px solid #f1b0b0",
-          borderRadius: "10px",
-          padding: "1.5rem",
-          marginBottom: "2rem"
-        }}>
-          <h3 style={{ marginBottom: "1rem", color: "#e53e3e" }}>⚠️ Produits en rupture imminente</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ borderBottom: "1px solid #f1b0b0", padding: "0.5rem", textAlign: "left" }}>Produit</th>
-                <th style={{ borderBottom: "1px solid #f1b0b0", padding: "0.5rem", textAlign: "left" }}>Stock théorique</th>
-                <th style={{ borderBottom: "1px solid #f1b0b0", padding: "0.5rem", textAlign: "left" }}>Seuil</th>
-                <th style={{ borderBottom: "1px solid #f1b0b0", padding: "0.5rem", textAlign: "left" }}>Unité</th>
-              </tr>
-            </thead>
-            <tbody>
-              {alertes.slice(0, 5).map((alerte) => (
-                <tr key={alerte.produit_id}>
-                  <td style={{ borderBottom: "1px solid #fde", padding: "0.5rem", fontWeight: "bold" }}>{alerte.produit_nom}</td>
-                  <td style={{ borderBottom: "1px solid #fde", padding: "0.5rem", color: "#e53e3e" }}>{alerte.stock_theorique}</td>
-                  <td style={{ borderBottom: "1px solid #fde", padding: "0.5rem" }}>{alerte.seuil_alerte}</td>
-                  <td style={{ borderBottom: "1px solid #fde", padding: "0.5rem" }}>{alerte.unite}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Link to="/alertes" style={{ fontSize: "0.9rem", color: "#e53e3e", textDecoration: "underline", marginTop: "0.75rem", display: "block" }}>
-            Voir toutes les alertes ({alertes.length}) →
-          </Link>
         </div>
       )}
 

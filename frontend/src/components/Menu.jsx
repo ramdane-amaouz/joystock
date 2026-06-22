@@ -8,6 +8,7 @@ const ITEMS = [
   { to: "/statistiques",label: "Statistiques",     icone: "📊", end: false, admin: true  },
   { to: "/recettes",    label: "Recettes",         icone: "🍽️", end: false, admin: true  },
   { to: "/alertes",     label: "Alertes",          icone: "⚠️", end: false, admin: true  },
+  { to: "/previsions",  label: "Prévisions",       icone: "🔮", end: false, admin: true  },
   { to: "/invitations", label: "Invitations",      icone: "✉️", end: false, admin: true  },
 ];
 

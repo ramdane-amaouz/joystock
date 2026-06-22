@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../../supabaseClient";
 
 function Ajout_Recettes() {
   const [produits, setProduits] = useState([]);
@@ -50,7 +51,7 @@ function Ajout_Recettes() {
     setIngredients((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function creerRecette(e) {
+  /*function creerRecette(e) {
     e.preventDefault();
     setErreur("");
     setMessage("");
@@ -97,8 +98,49 @@ function Ajout_Recettes() {
         ]);
         })
         .catch((error) => setErreur(error.message));
+    }*/
+
+
+  async function creerRecette(e) {
+    e.preventDefault();
+    setErreur("");
+    setMessage("");
+
+    const ingredientsValides = ingredients
+      .filter(i => i.produit_ingredient_id !== "" && i.quantite !== "")
+      .map(i => ({
+        produit_ingredient_id: Number(i.produit_ingredient_id),
+        quantite: Number(i.quantite)
+      }));
+
+    if (ingredientsValides.length === 0) {
+      setErreur("Veuillez ajouter au moins un ingrédient.");
+      return;
     }
 
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) throw new Error("Non connecté");
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/recettes/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`  // ← ajouté
+        },
+        body: JSON.stringify({ nom, ingredients: ingredientsValides })
+      });
+
+      if (!response.ok) throw new Error("Erreur lors de la création de la recette");
+
+      setMessage("Recette créée avec succès.");
+      setNom("");
+      setIngredients([{ produit_ingredient_id: "", quantite: "" }]);
+
+    } catch (error) {
+      setErreur(error.message);
+    }
+  }
   return (
     <div>
       <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>

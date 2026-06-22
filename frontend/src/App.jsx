@@ -20,6 +20,9 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/pages_cachees/ResetPassword";
 
+import Previsions from "./pages/Previsions";
+
+
 import SaisirVentes from "./pages/pages_cachees/Saisir-ventes";
 
 import { supabase } from "./supabaseClient";
@@ -159,6 +162,7 @@ function App() {
                           <Route path="/modifier-recette/:id" element={<ModifierRecette />} />
                           <Route path="/ajout-recette" element={<Ajout_Recettes />} /> 
                           <Route path="/saisir-ventes" element={<SaisirVentes />} />
+                          <Route path="/previsions" element={<Previsions />} />
                         </>
                       )}
 

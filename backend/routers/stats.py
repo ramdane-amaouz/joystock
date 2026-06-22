@@ -192,3 +192,17 @@ def get_ecarts_inventaire(user=Depends(admin_user)):
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/previsions")
+def get_previsions(user=Depends(admin_user), jours: int = 30):
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .rpc("get_previsions", {"p_jours": jours})
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

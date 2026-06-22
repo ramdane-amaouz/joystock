@@ -169,12 +169,11 @@ describe('Accueil', () => {
     })
   })
 
-  it('affiche le bloc produits en rupture imminente', async () => {
+  it('n\'affiche plus le bloc produits en rupture imminente sur le dashboard', async () => {
     mockFetchPourAdmin()
     renderAccueil(true)
     await waitFor(() => {
-      expect(screen.getByText('⚠️ Produits en rupture imminente')).toBeInTheDocument()
-      expect(screen.getByText('Bol')).toBeInTheDocument()
+      expect(screen.queryByText('⚠️ Produits en rupture imminente')).not.toBeInTheDocument()
     })
   })
 
@@ -290,7 +289,7 @@ describe('Accueil - Écarts inventaire', () => {
     })
   })
 
-  it('affiche le bloc détail si écarts significatifs', async () => {
+  /*it('affiche le bloc détail si écarts significatifs', async () => {
     mockFetchAvecEcarts([{
       inventaire_id: 27,
       date_inventaire: "2026-06-16T07:31:32",
@@ -306,6 +305,24 @@ describe('Accueil - Écarts inventaire', () => {
     await waitFor(() => {
       expect(screen.getByText(/Écarts détectés lors du dernier inventaire/)).toBeInTheDocument()
       expect(screen.getByText('Pain tacos')).toBeInTheDocument()
+    })
+  })*/
+
+  it('n\'affiche plus le bloc détail écarts sur le dashboard', async () => {
+    mockFetchAvecEcarts([{
+      inventaire_id: 27,
+      date_inventaire: "2026-06-16T07:31:32",
+      produit_id: 1,
+      produit_nom: "Pain tacos",
+      categorie: "Pain",
+      unite: "unite",
+      quantite_reelle: 0.0,
+      stock_theorique_attendu: 172.0,
+      ecart: -172.0
+    }])
+    render(<MemoryRouter><Accueil admin={true} /></MemoryRouter>)
+    await waitFor(() => {
+      expect(screen.queryByText(/Écarts détectés lors du dernier inventaire/)).not.toBeInTheDocument()
     })
   })
 
