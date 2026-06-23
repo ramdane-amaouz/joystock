@@ -249,3 +249,85 @@ class TestStats:
             response = client_admin.get("/stats/ecarts-inventaire")
             assert response.status_code == 200
             assert response.json() == []
+
+
+class TestCoutsMatieres:
+    """Tests pour GET /stats/couts-matieres"""
+
+    def test_couts_matieres_sans_auth_refuse(self, client_non_authentifie):
+        """Sans token, accès refusé."""
+        response = client_non_authentifie.get("/stats/couts-matieres")
+        assert response.status_code == 422
+
+    def test_couts_matieres_employe_refuse(self, client_employe):
+        """Un employé ne peut pas consulter les coûts matières."""
+        response = client_employe.get("/stats/couts-matieres")
+        assert response.status_code == 403
+
+    def test_couts_matieres_admin_succes(self, client_admin):
+        """Un admin peut consulter les coûts matières."""
+        with patch("routers.stats.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [
+                {
+                    "recette_id": 1,
+                    "recette_nom": "Tacos poulet",
+                    "prix_vente": 8.50,
+                    "cout_matiere": 3.20,
+                    "marge": 5.30,
+                    "taux_marge": 62.4,
+                    "ingredients_sans_prix": 0
+                }
+            ]
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .execute.return_value = mock_response
+
+            response = client_admin.get("/stats/couts-matieres")
+            assert response.status_code == 200
+            assert response.json()[0]["recette_nom"] == "Tacos poulet"
+            assert response.json()[0]["marge"] == 5.30
+
+    def test_couts_matieres_liste_vide(self, client_admin):
+        """Retourne une liste vide si pas de données."""
+        with patch("routers.stats.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = []
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .execute.return_value = mock_response
+
+            response = client_admin.get("/stats/couts-matieres")
+            assert response.status_code == 200
+            assert response.json() == []
+
+    def test_detail_cout_matiere_admin_succes(self, client_admin):
+        """Un admin peut consulter le détail d'une recette."""
+        with patch("routers.stats.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [
+                {
+                    "recette_id": 1,
+                    "recette_nom": "Tacos poulet",
+                    "produit_id": 20,
+                    "produit_nom": "Poulet",
+                    "unite": "kg",
+                    "prix_unitaire": 9.00,
+                    "quantite": 0.15,
+                    "cout_ingredient": 1.35
+                }
+            ]
+            mock_supabase.schema.return_value.table.return_value.select.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.get("/stats/couts-matieres/1")
+            assert response.status_code == 200
+            assert response.json()[0]["cout_ingredient"] == 1.35
+
+    def test_detail_cout_matiere_sans_auth_refuse(self, client_non_authentifie):
+        """Sans token, détail refusé."""
+        response = client_non_authentifie.get("/stats/couts-matieres/1")
+        assert response.status_code == 422
+
+    def test_detail_cout_matiere_employe_refuse(self, client_employe):
+        """Un employé ne peut pas voir le détail des coûts."""
+        response = client_employe.get("/stats/couts-matieres/1")
+        assert response.status_code == 403

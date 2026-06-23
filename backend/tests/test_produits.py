@@ -253,3 +253,68 @@ class TestSeuilAlerte:
             response = client_admin.patch("/produits/9999/seuil-alerte", json={"seuil_alerte": 10})
             assert response.status_code == 404
             assert response.json()["detail"] == "Produit introuvable"
+
+
+
+class TestPrix:
+    """Tests pour PATCH /produits/{id}/prix"""
+
+    def test_update_prix_sans_auth_refuse(self, client_non_authentifie):
+        """Sans token, modification du prix refusée."""
+        response = client_non_authentifie.patch("/produits/1/prix", json={"prix": 9.99})
+        assert response.status_code == 422
+
+    def test_update_prix_employe_refuse(self, client_employe):
+        """Un employé ne peut pas modifier le prix."""
+        response = client_employe.patch("/produits/1/prix", json={"prix": 9.99})
+        assert response.status_code == 403
+
+    def test_update_prix_admin_succes(self, client_admin):
+        """Un admin peut modifier le prix d'un produit."""
+        with patch("routers.produits.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [{"id": 1, "nom": "Poulet", "prix": 9.99}]
+            mock_supabase.schema.return_value.table.return_value.update.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.patch("/produits/1/prix", json={"prix": 9.99})
+            assert response.status_code == 200
+            assert response.json()["message"] == "Prix mis à jour"
+
+    def test_update_prix_null_admin_succes(self, client_admin):
+        """Un admin peut remettre le prix à null."""
+        with patch("routers.produits.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [{"id": 1, "nom": "Poulet", "prix": None}]
+            mock_supabase.schema.return_value.table.return_value.update.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.patch("/produits/1/prix", json={"prix": None})
+            assert response.status_code == 200
+
+    def test_update_prix_produit_inexistant(self, client_admin):
+        """Retourne 404 si le produit n'existe pas."""
+        with patch("routers.produits.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = []
+            mock_supabase.schema.return_value.table.return_value.update.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.patch("/produits/9999/prix", json={"prix": 5.0})
+            assert response.status_code == 404
+
+    def test_add_produit_avec_prix(self, client_admin):
+        """Un admin peut créer un produit avec un prix."""
+        with patch("routers.produits.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [{"id": 3, "nom": "Coca cola", "prix": 0.80}]
+            mock_supabase.schema.return_value.table.return_value.insert.return_value \
+                .execute.return_value = mock_response
+
+            response = client_admin.post("/produits/add", json={
+                "nom": "Coca cola",
+                "categorie_id": 1,
+                "unite_id": 1,
+                "prix": 0.80
+            })
+            assert response.status_code == 200

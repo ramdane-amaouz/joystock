@@ -7,6 +7,7 @@ function ModifierRecette() {
   const navigate = useNavigate();
 
   const [nom, setNom] = useState("");
+  const [prixVente, setPrixVente] = useState("");
   const [produits, setProduits] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [erreur, setErreur] = useState("");
@@ -14,10 +15,7 @@ function ModifierRecette() {
 
   async function fetchAvecToken(url, options = {}) {
     const { data } = await supabase.auth.getSession();
-
-    if (!data.session) {
-      throw new Error("Utilisateur non connecté");
-    }
+    if (!data.session) throw new Error("Utilisateur non connecté");
 
     const response = await fetch(url, {
       ...options,
@@ -27,10 +25,7 @@ function ModifierRecette() {
       }
     });
 
-    if (!response.ok) {
-      throw new Error("Erreur lors de la requête");
-    }
-
+    if (!response.ok) throw new Error("Erreur lors de la requête");
     return response.json();
   }
 
@@ -40,7 +35,6 @@ function ModifierRecette() {
         const matieres = await fetchAvecToken(
           `${import.meta.env.VITE_API_URL}/produits/matieres-premieres`
         );
-
         setProduits(matieres);
 
         const recette = await fetchAvecToken(
@@ -48,7 +42,7 @@ function ModifierRecette() {
         );
 
         setNom(recette.nom);
-
+        setPrixVente(recette.prix_vente ?? "");
         setIngredients(
           recette.ingredients.map((ingredient) => ({
             produit_ingredient_id: ingredient.produit_ingredient_id,
@@ -72,13 +66,7 @@ function ModifierRecette() {
   }
 
   function ajouterLigneIngredient() {
-    setIngredients((prev) => [
-      ...prev,
-      {
-        produit_ingredient_id: "",
-        quantite: ""
-      }
-    ]);
+    setIngredients((prev) => [...prev, { produit_ingredient_id: "", quantite: "" }]);
   }
 
   function supprimerLigneIngredient(index) {
@@ -92,14 +80,10 @@ function ModifierRecette() {
 
     try {
       const ingredientsValides = ingredients
-        .filter(
-          (ingredient) =>
-            ingredient.produit_ingredient_id !== "" &&
-            ingredient.quantite !== ""
-        )
-        .map((ingredient) => ({
-          produit_ingredient_id: Number(ingredient.produit_ingredient_id),
-          quantite: Number(ingredient.quantite)
+        .filter(i => i.produit_ingredient_id !== "" && i.quantite !== "")
+        .map(i => ({
+          produit_ingredient_id: Number(i.produit_ingredient_id),
+          quantite: Number(i.quantite)
         }));
 
       if (ingredientsValides.length === 0) {
@@ -111,21 +95,18 @@ function ModifierRecette() {
         `${import.meta.env.VITE_API_URL}/recettes/update/${id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             nom,
+            prix_vente: prixVente !== "" ? Number(prixVente) : null,
             ingredients: ingredientsValides
           })
         }
       );
 
       setMessage("Recette modifiée avec succès.");
+      setTimeout(() => navigate("/recettes"), 800);
 
-      setTimeout(() => {
-        navigate("/recettes");
-      }, 800);
     } catch (error) {
       setErreur(error.message);
     }
@@ -133,9 +114,7 @@ function ModifierRecette() {
 
   return (
     <div>
-      <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>
-        Modifier la recette
-      </h2>
+      <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>Modifier la recette</h2>
 
       {erreur && <p style={{ color: "red" }}>{erreur}</p>}
       {message && <p style={{ color: "green" }}>{message}</p>}
@@ -151,26 +130,31 @@ function ModifierRecette() {
         }}
       >
         <div style={{ marginBottom: "1rem" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "bold"
-            }}
-          >
+          <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
             Nom de la recette
           </label>
-
           <input
             type="text"
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             required
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              boxSizing: "border-box"
-            }}
+            style={{ width: "100%", padding: "0.75rem", boxSizing: "border-box", borderRadius: "5px", border: "1px solid #ccc", fontSize: "1rem" }}
+          />
+        </div>
+
+        <div style={{ marginBottom: "1.5rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
+            Prix de vente (€)
+            <span style={{ color: "#888", fontWeight: "normal", marginLeft: "0.5rem" }}>— optionnel</span>
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Ex : 8.50"
+            value={prixVente}
+            onChange={(e) => setPrixVente(e.target.value)}
+            style={{ width: "100%", padding: "0.75rem", boxSizing: "border-box", borderRadius: "5px", border: "1px solid #ccc", fontSize: "1rem" }}
           />
         </div>
 
@@ -179,27 +163,15 @@ function ModifierRecette() {
         {ingredients.map((ingredient, index) => (
           <div
             key={index}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 120px 100px",
-              gap: "1rem",
-              marginBottom: "1rem"
-            }}
+            style={{ display: "grid", gridTemplateColumns: "1fr 120px 100px", gap: "1rem", marginBottom: "1rem" }}
           >
             <select
               value={ingredient.produit_ingredient_id}
-              onChange={(e) =>
-                modifierIngredient(
-                  index,
-                  "produit_ingredient_id",
-                  e.target.value
-                )
-              }
+              onChange={(e) => modifierIngredient(index, "produit_ingredient_id", e.target.value)}
               required
-              style={{ padding: "0.75rem" }}
+              style={{ padding: "0.75rem", borderRadius: "5px", border: "1px solid #ccc" }}
             >
               <option value="">Ingrédient</option>
-
               {produits.map((produit) => (
                 <option key={produit.id} value={produit.id}>
                   {produit.nom} ({produit.unites?.nom || produit.unite || ""})
@@ -213,23 +185,15 @@ function ModifierRecette() {
               step="0.01"
               placeholder="Quantité"
               value={ingredient.quantite}
-              onChange={(e) =>
-                modifierIngredient(index, "quantite", e.target.value)
-              }
+              onChange={(e) => modifierIngredient(index, "quantite", e.target.value)}
               required
-              style={{ padding: "0.75rem" }}
+              style={{ padding: "0.75rem", borderRadius: "5px", border: "1px solid #ccc" }}
             />
 
             <button
               type="button"
               onClick={() => supprimerLigneIngredient(index)}
-              style={{
-                backgroundColor: "#e74c3c",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer"
-              }}
+              style={{ backgroundColor: "#e74c3c", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
             >
               Retirer
             </button>
@@ -239,41 +203,21 @@ function ModifierRecette() {
         <button
           type="button"
           onClick={ajouterLigneIngredient}
-          style={{
-            padding: "0.75rem",
-            marginRight: "1rem",
-            backgroundColor: "#777",
-            color: "white",
-            border: "none",
-            borderRadius: "5px"
-          }}
+          style={{ padding: "0.75rem", marginRight: "1rem", backgroundColor: "#777", color: "white", border: "none", borderRadius: "5px" }}
         >
           Ajouter un ingrédient
         </button>
 
         <button
           type="submit"
-          style={{
-            padding: "0.75rem",
-            backgroundColor: "#333",
-            color: "white",
-            border: "none",
-            borderRadius: "5px"
-          }}
+          style={{ padding: "0.75rem", backgroundColor: "#333", color: "white", border: "none", borderRadius: "5px" }}
         >
           Enregistrer
         </button>
       </form>
 
       <div style={{ marginTop: "2rem" }}>
-        <Link
-          to="/recettes"
-          style={{
-            color: "#007BFF",
-            textDecoration: "none",
-            fontSize: "1.1rem"
-          }}
-        >
+        <Link to="/recettes" style={{ color: "#007BFF", textDecoration: "none", fontSize: "1.1rem" }}>
           ⟵ Retour aux recettes
         </Link>
       </div>

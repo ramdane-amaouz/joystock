@@ -27,7 +27,8 @@ function genererProduits(n) {
     type_produit: 'matiere_premiere',
     quantite: 100,
     unite: 'kg',
-    seuil_alerte: 10
+    seuil_alerte: 10,
+    prix: null  // ← ajouter
   }))
 }
 
@@ -84,17 +85,18 @@ describe('Produits', () => {
   it('affiche le sélecteur de lignes par page', async () => {
     mockFetch.mockResolvedValue({ ok: true, json: async () => genererProduits(3) })
     renderProduits()
-    const select = screen.getByRole('combobox')
-    expect(select).toBeInTheDocument()
-    expect(select.value).toBe('10')
+    const selects = screen.getAllByRole('combobox')
+    const selectParPage = selects[0]
+    expect(selectParPage.value).toBe('10')
   })
 
   it('change le nombre de lignes par page', async () => {
     mockFetch.mockResolvedValue({ ok: true, json: async () => genererProduits(3) })
     renderProduits()
-    const select = screen.getByRole('combobox')
-    fireEvent.change(select, { target: { value: '50' } })
-    expect(select.value).toBe('50')
+    const selects = screen.getAllByRole('combobox')
+    const selectParPage = selects[0]
+    fireEvent.change(selectParPage, { target: { value: '50' } })
+    expect(selectParPage.value).toBe('50')
   })
 
   it('affiche la pagination si plus de 10 produits', async () => {
@@ -162,4 +164,43 @@ describe('Produits', () => {
       expect(screen.queryByText("Seuil d'alerte")).not.toBeInTheDocument()
     })
   })
-})
+
+  it('affiche le bouton 💶 pour modifier le prix', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => genererProduits(1) })
+    renderProduits()
+    await waitFor(() => {
+      expect(screen.getByTitle('Modifier le prix')).toBeInTheDocument()
+    })
+  })
+
+  it('ouvre le modal prix au clic sur 💶', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => genererProduits(1) })
+    renderProduits()
+    await waitFor(() => {
+      fireEvent.click(screen.getByTitle('Modifier le prix'))
+    })
+    expect(screen.getAllByText('Prix unitaire')).toHaveLength(2)
+  })
+
+  it('ferme le modal prix au clic sur Annuler', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => genererProduits(1) })
+    renderProduits()
+    await waitFor(() => {
+      fireEvent.click(screen.getByTitle('Modifier le prix'))
+    })
+    fireEvent.click(screen.getAllByText('Annuler')[0])
+    await waitFor(() => {
+      expect(screen.queryByText(/Laisser vide pour ne pas renseigner/)).not.toBeInTheDocument()
+    })
+  })
+
+  it('affiche le prix si renseigné', async () => {
+    const produits = [{ ...genererProduits(1)[0], prix: 9.00 }]
+    mockFetch.mockResolvedValue({ ok: true, json: async () => produits })
+    renderProduits()
+    await waitFor(() => {
+      expect(screen.getByText(/9/)).toBeInTheDocument()
+    })
+  })
+}
+)

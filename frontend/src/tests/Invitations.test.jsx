@@ -36,22 +36,22 @@ describe('Invitations', () => {
 
   it('affiche le titre', () => {
     renderInvitations()
-    expect(screen.getByText('Inviter un employé')).toBeInTheDocument()
+    expect(screen.getByText('Invitations')).toBeInTheDocument()
   })
 
   it('affiche le formulaire', () => {
     renderInvitations()
-    expect(screen.getByPlaceholderText("Email de l'employé")).toBeInTheDocument()
+    expect(screen.getByPlaceholderText("employe@example.com")).toBeInTheDocument()
     expect(screen.getByRole('combobox')).toBeInTheDocument()
-    screen.getByText(/Créer l.invitation/)
+    screen.getByText(/Envoyer l.invitation/)
   })
 
   it('affiche les options de rôle', () => {
     renderInvitations()
     const select = screen.getByRole('combobox')
     expect(select).toBeInTheDocument()
-    expect(screen.getByText('Employé')).toBeInTheDocument()
-    expect(screen.getByText('Admin')).toBeInTheDocument()
+    expect(screen.getByText(/Employé/)).toBeInTheDocument()
+    expect(screen.getByText(/Administrateur/)).toBeInTheDocument()
   })
 
   it('le rôle par défaut est employé', () => {
@@ -64,7 +64,7 @@ describe('Invitations', () => {
 
   it('permet de saisir un email', () => {
     renderInvitations()
-    const input = screen.getByPlaceholderText("Email de l'employé")
+    const input = screen.getByPlaceholderText("employe@example.com")
     fireEvent.change(input, { target: { value: 'employe@test.com' } })
     expect(input.value).toBe('employe@test.com')
   })
@@ -88,17 +88,17 @@ describe('Invitations', () => {
     })
 
     renderInvitations()
-    fireEvent.change(screen.getByPlaceholderText("Email de l'employé"), {
+    fireEvent.change(screen.getByPlaceholderText("employe@example.com"), {
       target: { value: 'employe@test.com' }
     })
-    fireEvent.click(screen.getByText(/Créer l.invitation/))
+    fireEvent.click(screen.getByText(/Envoyer l.invitation/))
 
     await waitFor(() => {
-      expect(screen.getByText("Invitation créée avec succès. L'email a été envoyé !")).toBeInTheDocument()
+      expect(screen.getByText(/Invitation envoyée avec succès/)).toBeInTheDocument()
     })
 
     expect(screen.getByText(/Lien d.invitation/)).toBeInTheDocument()
-    expect(screen.getByDisplayValue('http://localhost:5173/inscription?token=fake-token-uuid')).toBeInTheDocument()
+    expect(screen.getByText('http://localhost:5173/inscription?token=fake-token-uuid')).toBeInTheDocument()
   })
 
   it('remet le formulaire à zéro après succès', async () => {
@@ -111,9 +111,9 @@ describe('Invitations', () => {
     })
 
     renderInvitations()
-    const input = screen.getByPlaceholderText("Email de l'employé")
+    const input = screen.getByPlaceholderText("employe@example.com")
     fireEvent.change(input, { target: { value: 'employe@test.com' } })
-    fireEvent.click(screen.getByText(/Créer l.invitation/))
+    fireEvent.click(screen.getByText(/Envoyer l.invitation/))
 
     await waitFor(() => {
       expect(input.value).toBe('')
@@ -126,10 +126,10 @@ describe('Invitations', () => {
     supabase.auth.getSession.mockResolvedValueOnce({ data: { session: null } })
 
     renderInvitations()
-    fireEvent.change(screen.getByPlaceholderText("Email de l'employé"), {
+    fireEvent.change(screen.getByPlaceholderText("employe@example.com"), {
       target: { value: 'employe@test.com' }
     })
-    fireEvent.click(screen.getByText(/Créer l.invitation/))
+    fireEvent.click(screen.getByText(/Envoyer l.invitation/))
 
     await waitFor(() => {
       expect(screen.getByText('Non connecté')).toBeInTheDocument()
@@ -140,10 +140,10 @@ describe('Invitations', () => {
     mockFetch.mockResolvedValue({ ok: false })
 
     renderInvitations()
-    fireEvent.change(screen.getByPlaceholderText("Email de l'employé"), {
+    fireEvent.change(screen.getByPlaceholderText("employe@example.com"), {
       target: { value: 'employe@test.com' }
     })
-    fireEvent.click(screen.getByText(/Créer l.invitation/))
+    fireEvent.click(screen.getByText(/Envoyer l.invitation/))
 
     await waitFor(() => {
       expect(screen.getByText("Erreur lors de la création de l'invitation")).toBeInTheDocument()
@@ -154,10 +154,10 @@ describe('Invitations', () => {
     mockFetch.mockRejectedValue(new Error('Erreur réseau'))
 
     renderInvitations()
-    fireEvent.change(screen.getByPlaceholderText("Email de l'employé"), {
+    fireEvent.change(screen.getByPlaceholderText("employe@example.com"), {
       target: { value: 'employe@test.com' }
     })
-    fireEvent.click(screen.getByText(/Créer l.invitation/))
+    fireEvent.click(screen.getByText(/Envoyer l.invitation/))
 
     await waitFor(() => {
       expect(screen.getByText('Erreur réseau')).toBeInTheDocument()

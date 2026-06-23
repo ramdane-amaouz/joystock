@@ -46,13 +46,8 @@ def get_recettes(required_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
 @router.get("/{recette_id}")
-def get_recette(
-    recette_id: int,
-    user=Depends(get_current_user)
-):
+def get_recette(recette_id: int, user=Depends(get_current_user)):
     try:
         recette_response = (
             supabase
@@ -95,11 +90,6 @@ def get_recette(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
-
-
-
 @router.post("/add")
 def add_recette(data: dict, user = Depends(get_current_user)):
     require_admin(user)
@@ -107,25 +97,30 @@ def add_recette(data: dict, user = Depends(get_current_user)):
         nom = data["nom"]
         ingredients = data["ingredients"]
 
+        nouvelle_recette = {"nom": nom}
+
+        # Prix de vente optionnel
+        if data.get("prix_vente") is not None:
+            nouvelle_recette["prix_vente"] = data["prix_vente"]
+
         recette_response = (
             supabase
             .schema("joystock")
             .table("recettes")
-            .insert({
-                "nom": nom
-            })
+            .insert(nouvelle_recette)
             .execute()
         )
 
         recette_id = recette_response.data[0]["id"]
 
-        lignes = []
-        for ingredient in ingredients:
-            lignes.append({
+        lignes = [
+            {
                 "recette_id": recette_id,
                 "produit_ingredient_id": ingredient["produit_ingredient_id"],
                 "quantite": ingredient["quantite"]
-            })
+            }
+            for ingredient in ingredients
+        ]
 
         lignes_response = (
             supabase
@@ -143,25 +138,26 @@ def add_recette(data: dict, user = Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.put("/update/{recette_id}")
-def update_recette(
-    recette_id: int,
-    data: dict,
-    user=Depends(get_current_user)
-):
+def update_recette(recette_id: int, data: dict, user=Depends(get_current_user)):
     require_admin(user)
-
     try:
         nom = data["nom"]
         ingredients = data["ingredients"]
+
+        update_data = {"nom": nom}
+
+        # Prix de vente optionnel — None = null en BDD
+        if "prix_vente" in data:
+            update_data["prix_vente"] = data["prix_vente"]
 
         recette_response = (
             supabase
             .schema("joystock")
             .table("recettes")
-            .update({"nom": nom})
+            .update(update_data)
             .eq("id", recette_id)
             .execute()
         )
@@ -175,14 +171,14 @@ def update_recette(
             .execute()
         )
 
-        lignes = []
-
-        for ingredient in ingredients:
-            lignes.append({
+        lignes = [
+            {
                 "recette_id": recette_id,
                 "produit_ingredient_id": ingredient["produit_ingredient_id"],
                 "quantite": ingredient["quantite"]
-            })
+            }
+            for ingredient in ingredients
+        ]
 
         lignes_response = (
             supabase
@@ -202,13 +198,36 @@ def update_recette(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/delete/{recette_id}")
-def delete_recette(
-    recette_id: int,
-    user=Depends(get_current_user)
-):
+@router.patch("/update/{recette_id}/prix")
+def update_prix_recette(recette_id: int, data: dict, user=Depends(get_current_user)):
     require_admin(user)
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("recettes")
+            .update({"prix_vente": data.get("prix_vente")})
+            .eq("id", recette_id)
+            .execute()
+        )
 
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Recette introuvable")
+
+        return {
+            "message": "Prix de vente mis à jour",
+            "recette": response.data[0]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/delete/{recette_id}")
+def delete_recette(recette_id: int, user=Depends(get_current_user)):
+    require_admin(user)
     try:
         (
             supabase
@@ -228,9 +247,7 @@ def delete_recette(
             .execute()
         )
 
-        return {
-            "message": "Recette supprimée avec succès"
-        }
+        return {"message": "Recette supprimée avec succès"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

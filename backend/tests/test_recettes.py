@@ -221,3 +221,59 @@ class TestDeleteRecette:
             response = client_admin.delete("/recettes/delete/1")
             assert response.status_code == 200
             assert response.json()["message"] == "Recette supprimée avec succès"
+
+
+class TestPrixRecette:
+    """Tests pour PATCH /recettes/update/{id}/prix"""
+
+    def test_update_prix_recette_sans_auth_refuse(self, client_non_authentifie):
+        """Sans token, modification du prix refusée."""
+        response = client_non_authentifie.patch("/recettes/update/1/prix", json={"prix_vente": 8.50})
+        assert response.status_code == 422
+
+    def test_update_prix_recette_employe_refuse(self, client_employe):
+        """Un employé ne peut pas modifier le prix de vente."""
+        response = client_employe.patch("/recettes/update/1/prix", json={"prix_vente": 8.50})
+        assert response.status_code == 403
+
+    def test_update_prix_recette_admin_succes(self, client_admin):
+        """Un admin peut modifier le prix de vente d'une recette."""
+        with patch("routers.recettes.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = [{"id": 1, "nom": "Tacos poulet", "prix_vente": 8.50}]
+            mock_supabase.schema.return_value.table.return_value.update.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.patch("/recettes/update/1/prix", json={"prix_vente": 8.50})
+            assert response.status_code == 200
+            assert response.json()["message"] == "Prix de vente mis à jour"
+
+    def test_update_prix_recette_inexistante(self, client_admin):
+        """Retourne 404 si la recette n'existe pas."""
+        with patch("routers.recettes.supabase") as mock_supabase:
+            mock_response = MagicMock()
+            mock_response.data = []
+            mock_supabase.schema.return_value.table.return_value.update.return_value \
+                .eq.return_value.execute.return_value = mock_response
+
+            response = client_admin.patch("/recettes/update/9999/prix", json={"prix_vente": 8.50})
+            assert response.status_code == 404
+
+    def test_add_recette_avec_prix_vente(self, client_admin):
+        """Un admin peut créer une recette avec un prix de vente."""
+        with patch("routers.recettes.supabase") as mock_supabase:
+            mock_recette = MagicMock()
+            mock_recette.data = [{"id": 3, "nom": "Tacos saumon", "prix_vente": 10.50}]
+            mock_lignes = MagicMock()
+            mock_lignes.data = [{"recette_id": 3, "produit_ingredient_id": 1, "quantite": 1}]
+
+            mock_supabase.schema.return_value.table.return_value.insert.return_value \
+                .execute.side_effect = [mock_recette, mock_lignes]
+
+            response = client_admin.post("/recettes/add", json={
+                "nom": "Tacos saumon",
+                "prix_vente": 10.50,
+                "ingredients": [{"produit_ingredient_id": 1, "quantite": 1}]
+            })
+            assert response.status_code == 200
+            assert response.json()["recette"]["prix_vente"] == 10.50

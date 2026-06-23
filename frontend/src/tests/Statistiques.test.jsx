@@ -86,6 +86,8 @@ function mockFetchTout() {
       return Promise.resolve({ ok: true, json: async () => [] })
     if (url.includes('/stats/stock-theorique'))
       return Promise.resolve({ ok: true, json: async () => FAKE_STOCK })
+    if (url.includes('/stats/couts-matieres'))  // ← ajouter
+      return Promise.resolve({ ok: true, json: async () => [] })
     return Promise.resolve({ ok: true, json: async () => [] })
   })
 }
@@ -281,6 +283,26 @@ describe('Statistiques', () => {
     renderStatistiques()
     await waitFor(() => {
       expect(screen.getByText('Erreur réseau')).toBeInTheDocument()
+    })
+  })
+
+
+
+
+
+  it('affiche l\'onglet Coûts & Marges', async () => {
+    mockFetchTout()
+    renderStatistiques()
+    await waitFor(() => {
+      expect(screen.getAllByText('Coûts & Marges')).toHaveLength(2)
+    })
+  })
+
+  it('affiche le message si pas de données coûts', async () => {
+    mockFetchTout() // retourne [] pour couts-matieres
+    renderStatistiques()
+    await waitFor(() => {
+      expect(screen.getByText(/renseignez les prix des produits/)).toBeInTheDocument()
     })
   })
 

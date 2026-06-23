@@ -206,3 +206,37 @@ def get_previsions(user=Depends(admin_user), jours: int = 30):
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+
+@router.get("/couts-matieres")
+def get_couts_matieres(user=Depends(admin_user)):
+    """Coût matière, marge et taux de marge par recette."""
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_cout_matiere_recettes")
+            .select("*")
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+ 
+ 
+@router.get("/couts-matieres/{recette_id}")
+def get_detail_cout_matiere(recette_id: int, user=Depends(admin_user)):
+    """Détail du coût matière par ingrédient pour une recette."""
+    try:
+        response = (
+            supabase
+            .schema("joystock")
+            .table("v_detail_cout_matiere")
+            .select("*")
+            .eq("recette_id", recette_id)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

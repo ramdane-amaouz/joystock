@@ -11,10 +11,15 @@ function Produits() {
   const [parPage, setParPage] = useState(10);
 
   // Modal seuil alerte
-  const [modalOuvert, setModalOuvert] = useState(false);
+  const [modalSeuilOuvert, setModalSeuilOuvert] = useState(false);
   const [produitSelectionne, setProduitSelectionne] = useState(null);
   const [nouveauSeuil, setNouveauSeuil] = useState("");
-  const [messageModal, setMessageModal] = useState("");
+  const [messageModalSeuil, setMessageModalSeuil] = useState("");
+
+  // Modal prix
+  const [modalPrixOuvert, setModalPrixOuvert] = useState(false);
+  const [nouveauPrix, setNouveauPrix] = useState("");
+  const [messageModalPrix, setMessageModalPrix] = useState("");
 
   function chargerProduits() {
     fetch(`${import.meta.env.VITE_API_URL}/produits`)
@@ -27,7 +32,6 @@ function Produits() {
     chargerProduits();
   }, []);
 
-  // Reset page quand on change le nombre par page
   function changerParPage(e) {
     setParPage(Number(e.target.value));
     setPage(1);
@@ -37,22 +41,24 @@ function Produits() {
   const debut = (page - 1) * parPage;
   const produitsPagines = produits.slice(debut, debut + parPage);
 
-  function ouvrirModal(produit) {
+  // ── Modal seuil ───────────────────────────────────────────────────────────
+
+  function ouvrirModalSeuil(produit) {
     setProduitSelectionne(produit);
     setNouveauSeuil(produit.seuil_alerte ?? 0);
-    setMessageModal("");
-    setModalOuvert(true);
+    setMessageModalSeuil("");
+    setModalSeuilOuvert(true);
   }
 
-  function fermerModal() {
-    setModalOuvert(false);
+  function fermerModalSeuil() {
+    setModalSeuilOuvert(false);
     setProduitSelectionne(null);
     setNouveauSeuil("");
   }
 
   async function enregistrerSeuil(e) {
     e.preventDefault();
-    setMessageModal("");
+    setMessageModalSeuil("");
 
     try {
       const { data } = await supabase.auth.getSession();
@@ -72,11 +78,58 @@ function Produits() {
 
       if (!response.ok) throw new Error("Erreur lors de la mise à jour");
 
-      setMessageModal("Seuil mis à jour ✅");
+      setMessageModalSeuil("Seuil mis à jour ✅");
       chargerProduits();
-      setTimeout(() => fermerModal(), 1000);
+      setTimeout(() => fermerModalSeuil(), 1000);
     } catch (error) {
-      setMessageModal(error.message);
+      setMessageModalSeuil(error.message);
+    }
+  }
+
+  // ── Modal prix ────────────────────────────────────────────────────────────
+
+  function ouvrirModalPrix(produit) {
+    setProduitSelectionne(produit);
+    setNouveauPrix(produit.prix ?? "");
+    setMessageModalPrix("");
+    setModalPrixOuvert(true);
+  }
+
+  function fermerModalPrix() {
+    setModalPrixOuvert(false);
+    setProduitSelectionne(null);
+    setNouveauPrix("");
+  }
+
+  async function enregistrerPrix(e) {
+    e.preventDefault();
+    setMessageModalPrix("");
+
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) throw new Error("Non connecté");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/produits/${produitSelectionne.produit_id}/prix`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.session.access_token}`
+          },
+          body: JSON.stringify({
+            prix: nouveauPrix === "" ? null : Number(nouveauPrix)
+          })
+        }
+      );
+
+      if (!response.ok) throw new Error("Erreur lors de la mise à jour");
+
+      setMessageModalPrix("Prix mis à jour ✅");
+      chargerProduits();
+      setTimeout(() => fermerModalPrix(), 1000);
+    } catch (error) {
+      setMessageModalPrix(error.message);
     }
   }
 
@@ -85,18 +138,12 @@ function Produits() {
       <h2 style={{ textAlign: "left", marginBottom: "2rem" }}>Produits</h2>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        {/* Sélecteur lignes par page */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <label style={{ fontSize: "0.9rem", color: "#555" }}>Afficher</label>
           <select
             value={parPage}
             onChange={changerParPage}
-            style={{
-              padding: "0.4rem 0.6rem",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: "0.9rem"
-            }}
+            style={{ padding: "0.4rem 0.6rem", borderRadius: "5px", border: "1px solid #ccc", fontSize: "0.9rem" }}
           >
             <option value={10}>10</option>
             <option value={50}>50</option>
@@ -107,10 +154,7 @@ function Produits() {
           </span>
         </div>
 
-        <Link
-          to="/ajout-produit"
-          style={{ color: "#007BFF", textDecoration: "none", fontSize: "1rem" }}
-        >
+        <Link to="/ajout-produit" style={{ color: "#007BFF", textDecoration: "none", fontSize: "1rem" }}>
           + Créer un produit
         </Link>
       </div>
@@ -125,6 +169,7 @@ function Produits() {
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Type</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Quantité</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Unité</th>
+            <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Prix unitaire</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>Seuil alerte</th>
             <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}></th>
           </tr>
@@ -137,22 +182,30 @@ function Produits() {
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.type_produit}</td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.quantite}</td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.unite}</td>
+              <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
+                {produit.prix != null
+                  ? <span style={{ fontWeight: "bold" }}>{produit.prix} €<span style={{ color: "#888", fontWeight: "normal", fontSize: "0.85rem" }}>/{produit.unite}</span></span>
+                  : <span style={{ color: "#aaa", fontSize: "0.85rem" }}>—</span>
+                }
+              </td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>{produit.seuil_alerte ?? 0}</td>
               <td style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
-                <button
-                  onClick={() => ouvrirModal(produit)}
-                  title="Modifier le seuil d'alerte"
-                  style={{
-                    background: "none",
-                    border: "1px solid #ccc",
-                    borderRadius: "6px",
-                    padding: "0.3rem 0.6rem",
-                    cursor: "pointer",
-                    fontSize: "1rem"
-                  }}
-                >
-                  ⚙️
-                </button>
+                <div style={{ display: "flex", gap: "0.4rem" }}>
+                  <button
+                    onClick={() => ouvrirModalPrix(produit)}
+                    title="Modifier le prix"
+                    style={{ background: "none", border: "1px solid #ccc", borderRadius: "6px", padding: "0.3rem 0.6rem", cursor: "pointer", fontSize: "1rem" }}
+                  >
+                    💶
+                  </button>
+                  <button
+                    onClick={() => ouvrirModalSeuil(produit)}
+                    title="Modifier le seuil d'alerte"
+                    style={{ background: "none", border: "1px solid #ccc", borderRadius: "6px", padding: "0.3rem 0.6rem", cursor: "pointer", fontSize: "1rem" }}
+                  >
+                    ⚙️
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -162,20 +215,8 @@ function Produits() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginTop: "1.5rem" }}>
-          <button
-            onClick={() => setPage(1)}
-            disabled={page === 1}
-            style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === 1 ? "default" : "pointer", backgroundColor: "white", color: page === 1 ? "#ccc" : "#333" }}
-          >
-            «
-          </button>
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === 1 ? "default" : "pointer", backgroundColor: "white", color: page === 1 ? "#ccc" : "#333" }}
-          >
-            ‹
-          </button>
+          <button onClick={() => setPage(1)} disabled={page === 1} style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === 1 ? "default" : "pointer", backgroundColor: "white", color: page === 1 ? "#ccc" : "#333" }}>«</button>
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === 1 ? "default" : "pointer", backgroundColor: "white", color: page === 1 ? "#ccc" : "#333" }}>‹</button>
 
           {Array.from({ length: totalPages }, (_, i) => i + 1)
             .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
@@ -188,46 +229,72 @@ function Produits() {
               item === "..." ? (
                 <span key={`ellipsis-${i}`} style={{ padding: "0.4rem 0.3rem", color: "#888" }}>…</span>
               ) : (
-                <button
-                  key={item}
-                  onClick={() => setPage(item)}
-                  style={{
-                    padding: "0.4rem 0.7rem",
-                    borderRadius: "5px",
-                    border: "1px solid #ccc",
-                    cursor: "pointer",
-                    backgroundColor: page === item ? "#333" : "white",
-                    color: page === item ? "white" : "#333",
-                    fontWeight: page === item ? "bold" : "normal"
-                  }}
-                >
+                <button key={item} onClick={() => setPage(item)} style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: "pointer", backgroundColor: page === item ? "#333" : "white", color: page === item ? "white" : "#333", fontWeight: page === item ? "bold" : "normal" }}>
                   {item}
                 </button>
               )
             )}
 
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === totalPages ? "default" : "pointer", backgroundColor: "white", color: page === totalPages ? "#ccc" : "#333" }}
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === totalPages ? "default" : "pointer", backgroundColor: "white", color: page === totalPages ? "#ccc" : "#333" }}>›</button>
+          <button onClick={() => setPage(totalPages)} disabled={page === totalPages} style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === totalPages ? "default" : "pointer", backgroundColor: "white", color: page === totalPages ? "#ccc" : "#333" }}>»</button>
+        </div>
+      )}
+
+      {/* Modal prix */}
+      {modalPrixOuvert && produitSelectionne && (
+        <div
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}
+          onClick={fermerModalPrix}
+        >
+          <div
+            style={{ backgroundColor: "white", padding: "2rem", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.2)", width: "100%", maxWidth: "380px" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            ›
-          </button>
-          <button
-            onClick={() => setPage(totalPages)}
-            disabled={page === totalPages}
-            style={{ padding: "0.4rem 0.7rem", borderRadius: "5px", border: "1px solid #ccc", cursor: page === totalPages ? "default" : "pointer", backgroundColor: "white", color: page === totalPages ? "#ccc" : "#333" }}
-          >
-            »
-          </button>
+            <h3 style={{ marginBottom: "0.5rem" }}>Prix unitaire</h3>
+            <p style={{ color: "#888", marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+              {produitSelectionne.nom} — par {produitSelectionne.unite}
+            </p>
+
+            {messageModalPrix && (
+              <p style={{ color: messageModalPrix.includes("✅") ? "green" : "red", marginBottom: "1rem" }}>{messageModalPrix}</p>
+            )}
+
+            <form onSubmit={enregistrerPrix} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
+                  Prix (€ / {produitSelectionne.unite})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ex : 9.00"
+                  value={nouveauPrix}
+                  onChange={(e) => setNouveauPrix(e.target.value)}
+                  style={{ width: "100%", padding: "0.75rem", borderRadius: "5px", border: "1px solid #ccc", fontSize: "1rem", boxSizing: "border-box" }}
+                />
+                <p style={{ color: "#aaa", fontSize: "0.8rem", marginTop: "0.4rem" }}>
+                  Laisser vide pour ne pas renseigner de prix.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <button type="submit" style={{ flex: 1, padding: "0.75rem", backgroundColor: "#333", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontSize: "1rem" }}>
+                  Enregistrer
+                </button>
+                <button type="button" onClick={fermerModalPrix} style={{ flex: 1, padding: "0.75rem", backgroundColor: "#f5f5f5", color: "#333", border: "1px solid #ccc", borderRadius: "5px", cursor: "pointer", fontSize: "1rem" }}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* Modal seuil alerte */}
-      {modalOuvert && produitSelectionne && (
+      {modalSeuilOuvert && produitSelectionne && (
         <div
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}
-          onClick={fermerModal}
+          onClick={fermerModalSeuil}
         >
           <div
             style={{ backgroundColor: "white", padding: "2rem", borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.2)", width: "100%", maxWidth: "380px" }}
@@ -236,8 +303,8 @@ function Produits() {
             <h3 style={{ marginBottom: "0.5rem" }}>Seuil d'alerte</h3>
             <p style={{ color: "#888", marginBottom: "1.5rem", fontSize: "0.95rem" }}>{produitSelectionne.nom}</p>
 
-            {messageModal && (
-              <p style={{ color: messageModal.includes("✅") ? "green" : "red", marginBottom: "1rem" }}>{messageModal}</p>
+            {messageModalSeuil && (
+              <p style={{ color: messageModalSeuil.includes("✅") ? "green" : "red", marginBottom: "1rem" }}>{messageModalSeuil}</p>
             )}
 
             <form onSubmit={enregistrerSeuil} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -259,7 +326,7 @@ function Produits() {
                 <button type="submit" style={{ flex: 1, padding: "0.75rem", backgroundColor: "#333", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontSize: "1rem" }}>
                   Enregistrer
                 </button>
-                <button type="button" onClick={fermerModal} style={{ flex: 1, padding: "0.75rem", backgroundColor: "#f5f5f5", color: "#333", border: "1px solid #ccc", borderRadius: "5px", cursor: "pointer", fontSize: "1rem" }}>
+                <button type="button" onClick={fermerModalSeuil} style={{ flex: 1, padding: "0.75rem", backgroundColor: "#f5f5f5", color: "#333", border: "1px solid #ccc", borderRadius: "5px", cursor: "pointer", fontSize: "1rem" }}>
                   Annuler
                 </button>
               </div>
