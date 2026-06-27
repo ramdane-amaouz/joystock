@@ -33,15 +33,16 @@ function ResetPassword() {
 
 
     useEffect(() => {
-      // Vérifier le hash de l'URL directement au montage
       const hash = window.location.hash;
       if (hash && hash.includes("access_token")) {
         setEtape("nouveau");
+        setMessage(""); // vider le message de l'étape précédente
       }
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "PASSWORD_RECOVERY") {
           setEtape("nouveau");
+          setMessage(""); // vider le message de l'étape précédente
         }
       });
 
