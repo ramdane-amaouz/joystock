@@ -35,6 +35,8 @@ function ResetPassword() {
     useEffect(() => {
       // Au montage, vérifier si une session PASSWORD_RECOVERY est déjà établie
       supabase.auth.getSession().then(({ data }) => {
+        console.log("Session au montage:", data.session);
+        console.log("Event type:", data.session?.user);
         if (data.session) {
           setEtape("nouveau");
           setMessage("");
