@@ -19,7 +19,7 @@ import ModifierRecette from "./pages/pages_cachees/Modifier-recette";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/pages_cachees/ResetPassword";
-
+import Equipe from "./pages/Equipe";
 import Previsions from "./pages/Previsions";
 
 
@@ -33,7 +33,7 @@ function App() {
   const [chargement, setChargement] = useState(true);
   const [menuReduit, setMenuReduit] = useState(false);
 
-  async function chargerProfil(session) {
+  /*async function chargerProfil(session) {
     if (!session) {
       setProfil(null);
       return;
@@ -48,7 +48,32 @@ function App() {
       console.error("Erreur chargement profil :", error);
       setProfil(null);
     }
+  }*/
+
+
+  async function chargerProfil(session) {
+  if (!session) {
+    setProfil(null);
+    return;
   }
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/profiles/me`, {
+      headers: { Authorization: `Bearer ${session.access_token}` }
+    });
+
+    if (!response.ok) {
+      await supabase.auth.signOut();
+      setProfil(null);
+      return;
+    }
+
+    const data = await response.json();
+    setProfil(data);
+  } catch (error) {
+    console.error("Erreur chargement profil :", error);
+    setProfil(null);
+  }
+}
 
   useEffect(() => {
     async function chargerSession() {
@@ -162,6 +187,7 @@ function App() {
                           <Route path="/modifier-recette/:id" element={<ModifierRecette />} />
                           <Route path="/ajout-recette" element={<Ajout_Recettes />} /> 
                           <Route path="/saisir-ventes" element={<SaisirVentes />} />
+                          <Route path="/equipe" element={<Equipe />} />
                           <Route path="/previsions" element={<Previsions />} />
                         </>
                       )}

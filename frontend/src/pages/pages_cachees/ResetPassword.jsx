@@ -19,7 +19,7 @@ function ResetPassword() {
   const [etape, setEtape] = useState("demande"); // "demande" ou "nouveau"
 
   // Si l'utilisateur arrive depuis le lien Supabase, une session est automatiquement créée
-    useEffect(() => {
+    /*useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "PASSWORD_RECOVERY") {
         setEtape("nouveau");
@@ -27,6 +27,25 @@ function ResetPassword() {
     });
 
     return () => subscription.unsubscribe();
+    }, []);*/
+
+
+
+
+    useEffect(() => {
+      // Vérifier le hash de l'URL directement au montage
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token")) {
+        setEtape("nouveau");
+      }
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setEtape("nouveau");
+        }
+      });
+
+      return () => subscription.unsubscribe();
     }, []);
 
    /* useEffect(() => {

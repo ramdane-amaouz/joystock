@@ -10,6 +10,7 @@ const ITEMS = [
   { to: "/alertes",     label: "Alertes",          icone: "⚠️", end: false, admin: true  },
   { to: "/previsions",  label: "Prévisions",       icone: "🔮", end: false, admin: true  },
   { to: "/invitations", label: "Invitations",      icone: "✉️", end: false, admin: true  },
+  { to: "/equipe",      label: "Équipe",           icone: "👥", end: false, admin: true  },
 ];
 
 function Menu({ admin, reduit, setReduit }) {
