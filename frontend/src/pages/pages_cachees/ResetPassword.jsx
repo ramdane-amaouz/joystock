@@ -33,20 +33,16 @@ function ResetPassword() {
 
 
     useEffect(() => {
-      let handled = false;
-
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "PASSWORD_RECOVERY" && !handled) {
-          handled = true;
+      // Au montage, vérifier si une session PASSWORD_RECOVERY est déjà établie
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
           setEtape("nouveau");
           setMessage("");
         }
       });
 
-      // Vérifier immédiatement si on arrive avec un token dans l'URL
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session && window.location.hash.includes("access_token")) {
-          handled = true;
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
           setEtape("nouveau");
           setMessage("");
         }

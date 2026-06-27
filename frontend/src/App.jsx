@@ -86,7 +86,10 @@ function App() {
     chargerSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "PASSWORD_RECOVERY") return;
+      if (event === "PASSWORD_RECOVERY") {
+        await supabase.auth.signOut();
+        return;
+      }
       setSession(session);
       await chargerProfil(session);
     });
@@ -106,6 +109,7 @@ function App() {
   }
 
   const admin = profil?.role === "admin";
+  
 
   return (
     <BrowserRouter>
