@@ -33,16 +33,22 @@ function ResetPassword() {
 
 
     useEffect(() => {
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token")) {
-        setEtape("nouveau");
-        setMessage(""); // vider le message de l'étape précédente
-      }
+      // Vérifier si une session PASSWORD_RECOVERY est déjà active au montage
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.user) {
+          // Vérifier le type de session via les paramètres URL avant que Supabase les consomme
+          const hashParams = new URLSearchParams(window.location.hash.slice(1));
+          const type = hashParams.get("type");
+          if (type === "recovery") {
+            setEtape("nouveau");
+          }
+        }
+      });
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "PASSWORD_RECOVERY") {
           setEtape("nouveau");
-          setMessage(""); // vider le message de l'étape précédente
+          setMessage("");
         }
       });
 
