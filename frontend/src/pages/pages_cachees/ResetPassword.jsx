@@ -33,20 +33,20 @@ function ResetPassword() {
 
 
     useEffect(() => {
-      // Vérifier si une session PASSWORD_RECOVERY est déjà active au montage
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user) {
-          // Vérifier le type de session via les paramètres URL avant que Supabase les consomme
-          const hashParams = new URLSearchParams(window.location.hash.slice(1));
-          const type = hashParams.get("type");
-          if (type === "recovery") {
-            setEtape("nouveau");
-          }
+      let handled = false;
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" && !handled) {
+          handled = true;
+          setEtape("nouveau");
+          setMessage("");
         }
       });
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
+      // Vérifier immédiatement si on arrive avec un token dans l'URL
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session && window.location.hash.includes("access_token")) {
+          handled = true;
           setEtape("nouveau");
           setMessage("");
         }
@@ -54,6 +54,8 @@ function ResetPassword() {
 
       return () => subscription.unsubscribe();
     }, []);
+
+
 
    /* useEffect(() => {
         // Vérifier d'abord si on a déjà une session active (cas du lien Supabase)
