@@ -24,7 +24,7 @@ export default function Inventaire() {
   const [exportEnCours, setExportEnCours] = useState<number | null>(null);
   const [erreur, setErreur] = useState('');
 
-  useEffect(() => {
+  /*useEffect(() => {
     chargerInventaires();
   }, []);
 
@@ -101,7 +101,7 @@ export default function Inventaire() {
     if (type === 'stock') return { bg: '#e8f5e9', txt: '#2e7d32' };
     if (type === 'reception') return { bg: '#e3f2fd', txt: '#1565c0' };
     return { bg: '#f5f5f5', txt: '#555' };
-  }
+  }*/
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -133,11 +133,11 @@ export default function Inventaire() {
       </TouchableOpacity>
 
       <View style={styles.bloc}>
-        <Text style={styles.blocTitre}>Historique des inventaires</Text>
+       {/* <Text style={styles.blocTitre}>Historique des inventaires</Text>
 
-        {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
+        {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}*/}
 
-        {chargement ? (
+        {/*{chargement ? (
           <ActivityIndicator size="small" color="#333" style={{ marginTop: 12 }} />
         ) : inventaires.length === 0 ? (
           <Text style={styles.vide}>Aucun inventaire enregistré.</Text>
@@ -174,7 +174,7 @@ export default function Inventaire() {
               </View>
             );
           })
-        )}
+        )}*/}
       </View>
     </ScrollView>
   );

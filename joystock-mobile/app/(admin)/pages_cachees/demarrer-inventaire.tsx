@@ -7,15 +7,13 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
 import { API_URL } from '../../../constants/config';
 import Ionicons from '@expo/vector-icons/build/Ionicons';
-
 
 type Produit = {
   produit_id: number;
@@ -33,6 +31,11 @@ export default function DemarrerInventaire() {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
 
+  // Modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [produitSelectionne, setProduitSelectionne] = useState<Produit | null>(null);
+  const [valeurSaisie, setValeurSaisie] = useState('');
+
   useEffect(() => {
     fetch(`${API_URL}/produits`)
       .then((r) => r.json())
@@ -43,17 +46,35 @@ export default function DemarrerInventaire() {
       .finally(() => setChargement(false));
   }, []);
 
-  function modifierQuantite(produitId: number, valeur: string) {
-    setProduits((prev) =>
-      prev.map((p) =>
-        p.produit_id === produitId ? { ...p, nouvelle_quantite: valeur } : p
-      )
-    );
+  function ouvrirModal(produit: Produit) {
+    setProduitSelectionne(produit);
+    setValeurSaisie(produit.nouvelle_quantite);
+    setModalVisible(true);
+  }
+
+  function confirmerSaisie() {
+    if (produitSelectionne) {
+      setProduits((prev) =>
+        prev.map((p) =>
+          p.produit_id === produitSelectionne.produit_id
+            ? { ...p, nouvelle_quantite: valeurSaisie }
+            : p
+        )
+      );
+    }
+    setModalVisible(false);
+    setProduitSelectionne(null);
+    setValeurSaisie('');
+  }
+
+  function annulerModal() {
+    setModalVisible(false);
+    setProduitSelectionne(null);
+    setValeurSaisie('');
   }
 
   async function terminerInventaire() {
     setErreur('');
-
     const nonRemplis = produits.filter((p) => p.nouvelle_quantite === '');
     if (nonRemplis.length > 0) {
       Alert.alert(
@@ -66,7 +87,6 @@ export default function DemarrerInventaire() {
       );
       return;
     }
-
     soumettre();
   }
 
@@ -78,14 +98,11 @@ export default function DemarrerInventaire() {
         setErreur('Utilisateur non connecté');
         return;
       }
-
       const token = data.session.access_token;
-
       const lignes = produits.map((p) => ({
         produit_id: p.produit_id,
         quantite: p.nouvelle_quantite === '' ? 0 : Number(p.nouvelle_quantite),
       }));
-
       const response = await fetch(`${API_URL}/inventaires/demarrer-inventaire`, {
         method: 'POST',
         headers: {
@@ -94,9 +111,7 @@ export default function DemarrerInventaire() {
         },
         body: JSON.stringify({ lignes }),
       });
-
       if (!response.ok) throw new Error("Erreur lors de l'enregistrement");
-
       Alert.alert('Succès', 'Inventaire enregistré avec succès.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
@@ -116,12 +131,7 @@ export default function DemarrerInventaire() {
   }
 
   return (
-    
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      {/* <Text style={styles.titre}>Démarrer un inventaire</Text> */}
+    <View style={styles.container}>
       <Stack.Screen options={{
         title: 'Démarrer un inventaire',
         headerLeft: () => (
@@ -130,6 +140,7 @@ export default function DemarrerInventaire() {
           </TouchableOpacity>
         )
       }} />
+
       {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
 
       {/* En-tête tableau */}
@@ -151,18 +162,21 @@ export default function DemarrerInventaire() {
               <Text style={styles.categorie}>{item.categorie}</Text>
             </View>
             <Text style={[styles.cellule, { flex: 1.2 }]}>{item.quantite}</Text>
-            <TextInput
+            <TouchableOpacity
               style={[
-                styles.input,
+                styles.boutonSaisie,
                 { flex: 1.5 },
-                item.nouvelle_quantite !== '' && styles.inputRempli,
+                item.nouvelle_quantite !== '' && styles.boutonSaisieRempli,
               ]}
-              value={item.nouvelle_quantite}
-              onChangeText={(v) => modifierQuantite(item.produit_id, v)}
-              keyboardType="decimal-pad"
-              placeholder="—"
-              placeholderTextColor="#ccc"
-            />
+              onPress={() => ouvrirModal(item)}
+            >
+              <Text style={[
+                styles.boutonSaisieTxt,
+                item.nouvelle_quantite !== '' && styles.boutonSaisieTxtRempli,
+              ]}>
+                {item.nouvelle_quantite !== '' ? item.nouvelle_quantite : '—'}
+              </Text>
+            </TouchableOpacity>
             <Text style={[styles.cellule, { flex: 0.8 }]}>{item.unite}</Text>
           </View>
         )}
@@ -183,14 +197,49 @@ export default function DemarrerInventaire() {
           )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+
+      {/* Modal de saisie */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={annulerModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContenu}>
+            <Text style={styles.modalTitre}>{produitSelectionne?.nom}</Text>
+            <Text style={styles.modalSousTitre}>
+              Stock actuel : {produitSelectionne?.quantite} {produitSelectionne?.unite}
+            </Text>
+
+            <TextInput
+              style={styles.modalInput}
+              value={valeurSaisie}
+              onChangeText={setValeurSaisie}
+              keyboardType="decimal-pad"
+              placeholder={`Nouvelle quantité (${produitSelectionne?.unite})`}
+              placeholderTextColor="#aaa"
+              autoFocus
+            />
+
+            <View style={styles.modalBoutons}>
+              <TouchableOpacity style={styles.modalAnnuler} onPress={annulerModal}>
+                <Text style={styles.modalAnnulerTxt}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirmer} onPress={confirmerSaisie}>
+                <Text style={styles.modalConfirmerTxt}>Confirmer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
   centré: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  titre: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 16 },
   erreur: { color: 'red', marginBottom: 12, fontSize: 13 },
 
   entete: {
@@ -216,31 +265,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 6,
   },
-  ligneImpaire: {
-    backgroundColor: '#fafafa',
-  },
+  ligneImpaire: { backgroundColor: '#fafafa' },
   separateur: { height: 2 },
 
   nom: { fontSize: 14, fontWeight: '500', color: '#333' },
   categorie: { fontSize: 11, color: '#999', marginTop: 1 },
   cellule: { fontSize: 14, color: '#555', textAlign: 'center' },
 
-  input: {
+  boutonSaisie: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 6,
-    fontSize: 14,
-    color: '#333',
+    paddingVertical: 8,
     backgroundColor: 'white',
-    textAlign: 'center',
+    alignItems: 'center',
     marginHorizontal: 4,
   },
-  inputRempli: {
+  boutonSaisieRempli: {
     borderColor: '#333',
     backgroundColor: '#f0f0f0',
   },
+  boutonSaisieTxt: { fontSize: 14, color: '#ccc' },
+  boutonSaisieTxtRempli: { fontSize: 14, color: '#333', fontWeight: '600' },
 
   footer: {
     position: 'absolute',
@@ -260,4 +307,66 @@ const styles = StyleSheet.create({
   },
   boutonDisabled: { backgroundColor: '#999' },
   boutonTxt: { color: 'white', fontSize: 16, fontWeight: '600' },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContenu: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitre: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+  },
+  modalSousTitre: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 20,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalBoutons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalAnnuler: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+  },
+  modalAnnulerTxt: { color: '#555', fontWeight: '600' },
+  modalConfirmer: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#333',
+    alignItems: 'center',
+  },
+  modalConfirmerTxt: { color: 'white', fontWeight: '600' },
 });

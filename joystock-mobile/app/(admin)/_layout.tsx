@@ -32,10 +32,9 @@ export default function AdminLayout() {
   }
 
   const MENU_ITEMS = [
-    { label: 'Statistiques', icone: 'bar-chart-outline',  chemin: '/(admin)/pages_cachees/statistiques' },
-    { label: 'Alertes',      icone: 'warning-outline',    chemin: '/(admin)/pages_cachees/alertes' },
-    { label: 'Recettes',     icone: 'restaurant-outline', chemin: '/(admin)/pages_cachees/recettes' },
-    { label: 'Invitations',  icone: 'mail-outline',       chemin: '/(admin)/pages_cachees/invitations' },
+    { label: 'Alertes',     icone: 'warning-outline',      chemin: '/(admin)/pages_cachees/alertes' },
+    { label: 'Invitations', icone: 'mail-outline',          chemin: '/(admin)/pages_cachees/invitations' },
+    { label: 'Équipe',      icone: 'people-outline',        chemin: '/(admin)/pages_cachees/equipe' },
   ];
 
   return (

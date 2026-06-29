@@ -7,9 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { supabase } from '../../../supabaseClient';
@@ -33,6 +32,12 @@ export default function ReceptionLivraison() {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
 
+  // Modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [produitSelectionne, setProduitSelectionne] = useState<Produit | null>(null);
+  const [valeurCommandee, setValeurCommandee] = useState('');
+  const [valeurRecue, setValeurRecue] = useState('');
+
   useEffect(() => {
     fetch(`${API_URL}/produits`)
       .then((r) => r.json())
@@ -49,26 +54,45 @@ export default function ReceptionLivraison() {
       .finally(() => setChargement(false));
   }, []);
 
-  function modifierChamp(produitId: number, champ: 'quantite_commandee' | 'quantite_recue', valeur: string) {
-    setProduits((prev) =>
-      prev.map((p) =>
-        p.produit_id === produitId ? { ...p, [champ]: valeur } : p
-      )
-    );
+  function ouvrirModal(produit: Produit) {
+    setProduitSelectionne(produit);
+    setValeurCommandee(produit.quantite_commandee);
+    setValeurRecue(produit.quantite_recue);
+    setModalVisible(true);
+  }
+
+  function confirmerSaisie() {
+    if (produitSelectionne) {
+      setProduits((prev) =>
+        prev.map((p) =>
+          p.produit_id === produitSelectionne.produit_id
+            ? { ...p, quantite_commandee: valeurCommandee, quantite_recue: valeurRecue }
+            : p
+        )
+      );
+    }
+    setModalVisible(false);
+    setProduitSelectionne(null);
+    setValeurCommandee('');
+    setValeurRecue('');
+  }
+
+  function annulerModal() {
+    setModalVisible(false);
+    setProduitSelectionne(null);
+    setValeurCommandee('');
+    setValeurRecue('');
   }
 
   async function terminerReception() {
     setErreur('');
-
     const lignesRemplies = produits.filter(
       (p) => p.quantite_commandee !== '' || p.quantite_recue !== ''
     );
-
     if (lignesRemplies.length === 0) {
       Alert.alert('Attention', 'Veuillez saisir au moins une ligne de réception.');
       return;
     }
-
     setEnvoi(true);
     try {
       const { data, error } = await supabase.auth.getSession();
@@ -76,15 +100,12 @@ export default function ReceptionLivraison() {
         setErreur('Utilisateur non connecté');
         return;
       }
-
       const token = data.session.access_token;
-
       const lignes = lignesRemplies.map((p) => ({
         produit_id: p.produit_id,
         quantite_commandee: p.quantite_commandee === '' ? 0 : Number(p.quantite_commandee),
         quantite: p.quantite_recue === '' ? 0 : Number(p.quantite_recue),
       }));
-
       const response = await fetch(`${API_URL}/inventaires/reception-livraison`, {
         method: 'POST',
         headers: {
@@ -93,9 +114,7 @@ export default function ReceptionLivraison() {
         },
         body: JSON.stringify({ lignes }),
       });
-
       if (!response.ok) throw new Error("Erreur lors de l'enregistrement");
-
       Alert.alert('Succès', 'Réception enregistrée avec succès.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
@@ -119,15 +138,11 @@ export default function ReceptionLivraison() {
   ).length;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      {/* <Text style={styles.titre}>Réception de livraison</Text> */}
+    <View style={styles.container}>
       <Stack.Screen options={{
-        title: 'Démarrer un inventaire',
+        title: 'Réception de livraison',
         headerLeft: () => (
-          <TouchableOpacity onPress={() => router.push('/(employe)/inventaire')} style={{ marginLeft: 8 }}>
+          <TouchableOpacity onPress={() => router.push('/(admin)/inventaire')} style={{ marginLeft: 8 }}>
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
         )
@@ -154,37 +169,29 @@ export default function ReceptionLivraison() {
       <FlatList
         data={produits}
         keyExtractor={(item) => item.produit_id.toString()}
-        keyboardShouldPersistTaps="handled"
         renderItem={({ item, index }) => {
           const estSaisi = item.quantite_commandee !== '' || item.quantite_recue !== '';
           return (
-            <View style={[
-              styles.ligne,
-              index % 2 === 0 && styles.ligneImpaire,
-              estSaisi && styles.ligneSaisie,
-            ]}>
+            <TouchableOpacity
+              style={[
+                styles.ligne,
+                index % 2 === 0 && styles.ligneImpaire,
+                estSaisi && styles.ligneSaisie,
+              ]}
+              onPress={() => ouvrirModal(item)}
+            >
               <View style={{ flex: 2 }}>
                 <Text style={styles.nom} numberOfLines={1}>{item.nom}</Text>
                 <Text style={styles.stockActuel}>Stock: {item.quantite} {item.unite}</Text>
               </View>
-              <TextInput
-                style={[styles.input, { flex: 1.3 }, item.quantite_commandee !== '' && styles.inputRempli]}
-                value={item.quantite_commandee}
-                onChangeText={(v) => modifierChamp(item.produit_id, 'quantite_commandee', v)}
-                keyboardType="decimal-pad"
-                placeholder="—"
-                placeholderTextColor="#ccc"
-              />
-              <TextInput
-                style={[styles.input, { flex: 1.3 }, item.quantite_recue !== '' && styles.inputRempli]}
-                value={item.quantite_recue}
-                onChangeText={(v) => modifierChamp(item.produit_id, 'quantite_recue', v)}
-                keyboardType="decimal-pad"
-                placeholder="—"
-                placeholderTextColor="#ccc"
-              />
+              <Text style={[styles.celluleSaisie, { flex: 1.3 }, item.quantite_commandee !== '' && styles.celluleSaisieRemplie]}>
+                {item.quantite_commandee !== '' ? item.quantite_commandee : '—'}
+              </Text>
+              <Text style={[styles.celluleSaisie, { flex: 1.3 }, item.quantite_recue !== '' && styles.celluleSaisieRemplie]}>
+                {item.quantite_recue !== '' ? item.quantite_recue : '—'}
+              </Text>
               <Text style={[styles.unite, { flex: 0.8 }]}>{item.unite}</Text>
-            </View>
+            </TouchableOpacity>
           );
         }}
         ItemSeparatorComponent={() => <View style={styles.separateur} />}
@@ -204,14 +211,60 @@ export default function ReceptionLivraison() {
           )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+
+      {/* Modal de saisie */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={annulerModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContenu}>
+            <Text style={styles.modalTitre}>{produitSelectionne?.nom}</Text>
+            <Text style={styles.modalSousTitre}>
+              Stock actuel : {produitSelectionne?.quantite} {produitSelectionne?.unite}
+            </Text>
+
+            <Text style={styles.modalLabel}>Quantité commandée</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={valeurCommandee}
+              onChangeText={setValeurCommandee}
+              keyboardType="decimal-pad"
+              placeholder={`Commandée (${produitSelectionne?.unite})`}
+              placeholderTextColor="#aaa"
+              autoFocus
+            />
+
+            <Text style={styles.modalLabel}>Quantité reçue</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={valeurRecue}
+              onChangeText={setValeurRecue}
+              keyboardType="decimal-pad"
+              placeholder={`Reçue (${produitSelectionne?.unite})`}
+              placeholderTextColor="#aaa"
+            />
+
+            <View style={styles.modalBoutons}>
+              <TouchableOpacity style={styles.modalAnnuler} onPress={annulerModal}>
+                <Text style={styles.modalAnnulerTxt}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirmer} onPress={confirmerSaisie}>
+                <Text style={styles.modalConfirmerTxt}>Confirmer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
   centré: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  titre: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 12 },
   erreur: { color: 'red', marginBottom: 12, fontSize: 13 },
 
   compteur: {
@@ -244,7 +297,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 6,
   },
   ligneImpaire: { backgroundColor: '#fafafa' },
@@ -258,21 +311,15 @@ const styles = StyleSheet.create({
   stockActuel: { fontSize: 11, color: '#999', marginTop: 1 },
   unite: { fontSize: 13, color: '#777', textAlign: 'center' },
 
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
+  celluleSaisie: {
     fontSize: 14,
-    color: '#333',
-    backgroundColor: 'white',
+    color: '#ccc',
     textAlign: 'center',
     marginHorizontal: 3,
   },
-  inputRempli: {
-    borderColor: '#333',
-    backgroundColor: '#f0f0f0',
+  celluleSaisieRemplie: {
+    color: '#333',
+    fontWeight: '600',
   },
 
   footer: {
@@ -293,4 +340,73 @@ const styles = StyleSheet.create({
   },
   boutonDisabled: { backgroundColor: '#999' },
   boutonTxt: { color: 'white', fontSize: 16, fontWeight: '600' },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContenu: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitre: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+  },
+  modalSousTitre: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 20,
+  },
+  modalLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 6,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  modalBoutons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+  },
+  modalAnnuler: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+  },
+  modalAnnulerTxt: { color: '#555', fontWeight: '600' },
+  modalConfirmer: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#333',
+    alignItems: 'center',
+  },
+  modalConfirmerTxt: { color: 'white', fontWeight: '600' },
 });
