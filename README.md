@@ -73,6 +73,7 @@ JoyStock distingue deux rôles avec des accès différents :
 | Inviter des utilisateurs | ❌ |
 | Gérer les recettes | ❌ |
 | Configurer les seuils d'alerte | ❌ |
+| Voir les prévisions de réapprovisionnement | ✅️ |
 
 ### 👑 Admin
 | Fonctionnalité | Accès |
@@ -85,6 +86,7 @@ JoyStock distingue deux rôles avec des accès différents :
 | Ajouter / gérer les produits | ✅ |
 | Configurer les seuils d'alerte | ✅ |
 | Consulter les ventes | ✅ |
+| Voir les prévisions de réapprovisionnement | ✅️ |
 
 ---
 
@@ -200,4 +202,4 @@ eas build --platform android --profile preview
 
 ## 📄 Licence
 
-MIT — Ramdane Amaouz © 2026
+UCBL — Ramdane Amaouz © 2026
