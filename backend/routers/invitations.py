@@ -2,6 +2,9 @@ from services.mailer import send_invitation_email
 
 from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
+import os
+
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8080")
 
 from core.security import get_current_user, require_admin
 
@@ -31,7 +34,7 @@ def create_invitation(data: dict, user = Depends(get_current_user)):
 
         email_sent = send_invitation_email(to_email=email, token=token)
 
-        lien = f"http://localhost:5173/inscription?token={token}"
+        lien = f"{frontend_url}/inscription?token={token}"
 
         return {
             "message": "Invitation créée avec succès",

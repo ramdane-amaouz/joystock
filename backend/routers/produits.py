@@ -164,7 +164,6 @@ def add_unite(unite: dict, user = Depends(get_current_user)):
 
 @router.patch("/{produit_id}/seuil-alerte")
 def update_seuil_alerte(produit_id: int, data: dict, user=Depends(get_current_user)):
-    require_admin(user)
     try:
         response = (
             supabase
@@ -191,7 +190,6 @@ def update_seuil_alerte(produit_id: int, data: dict, user=Depends(get_current_us
 
 @router.patch("/{produit_id}/prix")
 def update_prix(produit_id: int, data: dict, user=Depends(get_current_user)):
-    require_admin(user)
     try:
         response = (
             supabase

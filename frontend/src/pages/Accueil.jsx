@@ -100,10 +100,10 @@ function Accueil({ admin }) {
           <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>{totalProduits}</p>
         </div>
 
-        <div style={carteStyle}>
+        {/*<div style={carteStyle}>
           <p style={{ color: "#888", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Stock total</p>
           <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>{stockTotal} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>unités</span></p>
-        </div>
+        </div>*/}
 
         {admin && (
           <div style={{
